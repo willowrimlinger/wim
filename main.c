@@ -15,68 +15,123 @@ const size_t BUF_INCR = 64;
 const int NORMAL_KEYS_LEN = 96;
 const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
 
-typedef struct CurPos {
+typedef struct CurPos_s {
     int y;
     int x;
     int desired_x;
-};
+} CurPos;
+
+void print_num(int y, int x, int num) {
+        move(y, x);
+        char str[3];
+        sprintf(str, "%d", num);
+        printw(str);
+}
 
 CurPos move_up(char *buffer, size_t *buf_idx, CurPos pos) {
     // loop back through the buffer until you hit a new line
-    size_t start_idx = *buf_idx;
-    size_t delta = 0;
-    while (buffer[start_idx-delta] != '\n') {
-        if (start_idx-delta == 0) {
+    size_t i = *buf_idx;
+    while (buffer[i] != '\n') {
+        if (i == 0) {
             return pos; // can't move up, first line
         }
-        delta++;
+        i--;
     }
+    i--; // move past the \n
     // keep going counting the entire length of the above line
     size_t above_line_length = 0;
-    while (buffer[start_idx-delta] != '\n' && start_idx-delta >= 0) {
+    while (buffer[i] != '\n' && i >= 0) {
         above_line_length++;
-        delta++;
+        i--;
     }
+
     // if the above line length is >= your desired x
-    if (above_line_length >= desired_x) {
+    if (above_line_length >= pos.desired_x) {
         // move that many spaces from the beginning of the above line
         // TODO word wrap and text extending past right edge
-        *buf_idx -= delta;
-        // TODO make new curPos
+        *buf_idx = i + pos.desired_x;
+        CurPos new_pos = {pos.y-1, pos.desired_x, pos.desired_x};
+        return new_pos;
+    } else { // if not, move to the end of the above line
+        *buf_idx = i + above_line_length;
+        CurPos new_pos = {pos.y-1, above_line_length, pos.desired_x};
+        return new_pos;
     }
-    // if not, move to the end of the above line
-    // either way, update the desired_x
+}
+
+CurPos move_down(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
+    // loop forward through the buffer until you hit a new line
+    size_t i = *buf_idx;
+    while (buffer[i] != '\n') {
+        if (i == buf_size-1) {
+            return pos; // can't move up, last line
+        }
+        i++;
+    }
+    // keep going counting the entire length of the below line
+    size_t below_line_length = 0;
+    while (buffer[i] != '\n' && i < buf_size) {
+        below_line_length++;
+        i++;
+    }
+    i++; // move i to be past the \n
+
+    // if the below line length is >= your desired x
+    if (below_line_length >= pos.desired_x) {
+        // move that many spaces from the beginning of the below line
+        // TODO word wrap and text extending past right edge
+        *buf_idx = i - (below_line_length - pos.desired_x);
+        CurPos new_pos = {pos.y+1, pos.desired_x, pos.desired_x};
+        return new_pos;
+    } else { // if not, move to the end of the below line
+        *buf_idx = i;
+        CurPos new_pos = {pos.y+1, below_line_length, pos.desired_x};
+        return new_pos;
+    }
 }
 
 // TODO in the move left and right functions, you will have to update the desired_x to be the new current x
+CurPos move_right(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
+    if (*buf_idx + 1 != buf_size && buffer[*buf_idx+1] != '\n') {
+        *buf_idx += 1;
+        CurPos new_pos = {pos.y, pos.x+1, pos.x+1};
+        return new_pos;
+    }
+    return pos;
+}
 
-void loop(char *buffer) {
-    int cur_y = 0;
-    int cur_x = 0;
+CurPos move_left(char *buffer, size_t *buf_idx, CurPos pos) {
+    if (*buf_idx != 0 && buffer[*buf_idx-1] != '\n') {
+        *buf_idx -= 1;
+        CurPos new_pos = {pos.y, pos.x-1, pos.x-1};
+        return new_pos;
+    }
+    return pos;
+}
+
+void loop(char *buffer, size_t buf_size) {
+    CurPos pos = {0, 0, 0};
     size_t buf_idx = 0;
     printw(buffer);
     refresh();
     while (1) {
-        move(cur_y, cur_x);
+        move(pos.y, pos.x);
         int key = getch();
         switch (key) {
             case KEY_UP:
-                CurPos pos = move_up(buffer, &buf_idx);
-                move(pos.y, pos.x);
+                pos = move_up(buffer, &buf_idx, pos);
                 break;
-//            case KEY_DOWN:
-//                CurPos pos = move_down(&buf_idx);
-//                move(pos.y, pos.x);
-//                break;
-//            case KEY_LEFT:
-//                CurPos pos = move_left(&buf_idx);
-//                move(pos.y, pos.x);
-//                break;
-//            case KEY_RIGHT:
-//                CurPos pos = move_right(&buf_idx);
-//                move(pos.y, pos.x);
-//                break;
+            case KEY_DOWN:
+                pos = move_down(buffer, buf_size, &buf_idx, pos);
+                break;
+            case KEY_RIGHT:
+                pos = move_right(buffer, buf_size, &buf_idx, pos);
+                break;
+            case KEY_LEFT:
+                pos = move_left(buffer, &buf_idx, pos);
+                break;
         }
+        print_num(20, 20, buf_idx);
         // text insertion
 //        for (int i = 0; i < NORMAL_KEYS_SIZE; i++) {
 //            if (key == NORMAL_KEYS[i]) {
@@ -115,7 +170,7 @@ int main(int argc, char *argv[]) {
     keypad(stdscr, TRUE);
 
     // main program loop
-    loop(buffer);
+    loop(buffer, buf_size);
 
     free(buffer);
     endwin();
