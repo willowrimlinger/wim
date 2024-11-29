@@ -16,52 +16,66 @@ const int NORMAL_KEYS_LEN = 96;
 const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
 
 typedef struct CurPos {
-    int x;
     int y;
+    int x;
+    int desired_x;
 };
 
-CurPos move_up(int *buf_idx) {
-
+CurPos move_up(char *buffer, size_t *buf_idx, CurPos pos) {
+    // loop back through the buffer until you hit a new line
+    size_t start_idx = *buf_idx;
+    size_t delta = 0;
+    while (buffer[start_idx-delta] != '\n') {
+        if (start_idx-delta == 0) {
+            return pos; // can't move up, first line
+        }
+        delta++;
+    }
+    // keep going counting the entire length of the above line
+    size_t above_line_length = 0;
+    while (buffer[start_idx-delta] != '\n' && start_idx-delta >= 0) {
+        above_line_length++;
+        delta++;
+    }
+    // if the above line length is >= your desired x
+    if (above_line_length >= desired_x) {
+        // move that many spaces from the beginning of the above line
+        // TODO word wrap and text extending past right edge
+        *buf_idx -= delta;
+        // TODO make new curPos
+    }
+    // if not, move to the end of the above line
+    // either way, update the desired_x
 }
 
-CurPos move_down(int *buf_idx) {
-
-}
-
-CurPos move_left(int *buf_idx) {
-
-}
-
-CurPos move_right(int *buf_idx) {
-
-}
+// TODO in the move left and right functions, you will have to update the desired_x to be the new current x
 
 void loop(char *buffer) {
-    int cur_x = 0;
     int cur_y = 0;
-    int buf_idx = 0;
+    int cur_x = 0;
+    size_t buf_idx = 0;
     printw(buffer);
     refresh();
     while (1) {
-        move(cur_x, cur_y);
+        move(cur_y, cur_x);
         int key = getch();
         switch (key) {
             case KEY_UP:
-                CurPos pos = move_up(&buf_idx);
-                move(pos.x, pos.y);
+                CurPos pos = move_up(buffer, &buf_idx);
+                move(pos.y, pos.x);
                 break;
-            case KEY_DOWN:
-                CurPos pos = move_down(&buf_idx);
-                move(pos.x, pos.y);
-                break;
-            case KEY_LEFT:
-                CurPos pos = move_left(&buf_idx);
-                move(pos.x, pos.y);
-                break;
-            case KEY_RIGHT:
-                CurPos pos = move_right(&buf_idx);
-                move(pos.x, pos.y);
-                break;
+//            case KEY_DOWN:
+//                CurPos pos = move_down(&buf_idx);
+//                move(pos.y, pos.x);
+//                break;
+//            case KEY_LEFT:
+//                CurPos pos = move_left(&buf_idx);
+//                move(pos.y, pos.x);
+//                break;
+//            case KEY_RIGHT:
+//                CurPos pos = move_right(&buf_idx);
+//                move(pos.y, pos.x);
+//                break;
         }
         // text insertion
 //        for (int i = 0; i < NORMAL_KEYS_SIZE; i++) {
