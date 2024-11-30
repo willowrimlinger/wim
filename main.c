@@ -29,18 +29,24 @@ void print_num(int y, int x, int num) {
 }
 
 CurPos move_up(char *buffer, size_t *buf_idx, CurPos pos) {
-    // loop back through the buffer until you hit a new line
     size_t i = *buf_idx;
-    while (buffer[i] != '\n') {
-        if (i == 0) {
-            return pos; // can't move up, first line
-        }
+    if (buffer[i] == '\n') {
+        // we are currently on an empty line
         i--;
+    } else {
+        // move to the beginning of the current line
+        while (buffer[i] != '\n') {
+            if (i == 0) {
+                return pos; // can't move up, first line
+            }
+            i--;
+        }
     }
-    i--; // move past the \n
-    // keep going counting the entire length of the above line
+    i--; // move past the \n at the end of the above line
+
+    // keep going, counting the entire length of the above line
     size_t above_line_length = 0;
-    while (buffer[i] != '\n' && i >= 0) {
+    while (i > 0 && buffer[i] != '\n') {
         above_line_length++;
         i--;
     }
@@ -62,19 +68,26 @@ CurPos move_up(char *buffer, size_t *buf_idx, CurPos pos) {
 CurPos move_down(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
     // loop forward through the buffer until you hit a new line
     size_t i = *buf_idx;
-    while (buffer[i] != '\n') {
-        if (i == buf_size-1) {
-            return pos; // can't move up, last line
-        }
+    if (buffer[i] == '\n') {
+        // we are currently on an empty line
         i++;
+    } else {
+        // move to the end of the current line
+        while (buffer[i] != '\n') {
+            if (i == buf_size - 1) {
+                return pos; // can't move down, last line
+            }
+            i++;
+        }
     }
-    // keep going counting the entire length of the below line
+    i++; // move past the \n at the end of the current line
+
+    // keep going, counting the entire length of the below line
     size_t below_line_length = 0;
     while (buffer[i] != '\n' && i < buf_size) {
         below_line_length++;
         i++;
     }
-    i++; // move i to be past the \n
 
     // if the below line length is >= your desired x
     if (below_line_length >= pos.desired_x) {
@@ -84,8 +97,8 @@ CurPos move_down(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
         CurPos new_pos = {pos.y+1, pos.desired_x, pos.desired_x};
         return new_pos;
     } else { // if not, move to the end of the below line
-        *buf_idx = i;
-        CurPos new_pos = {pos.y+1, below_line_length, pos.desired_x};
+        *buf_idx = i - 1;
+        CurPos new_pos = {pos.y+1, below_line_length - 1, pos.desired_x};
         return new_pos;
     }
 }
@@ -171,6 +184,13 @@ int main(int argc, char *argv[]) {
 
     // main program loop
     loop(buffer, buf_size);
+//    for (int i = 0; i < buf_size; i++) {
+//        if (buffer[i] == '\n') {
+//            printf("newline");
+//        } else {
+//            printf("%c", buffer[i]);
+//        }
+//    }
 
     free(buffer);
     endwin();
