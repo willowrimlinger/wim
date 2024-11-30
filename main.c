@@ -10,141 +10,114 @@
 #include <string.h>
 #include <ncurses.h>
 
-const size_t BUF_INCR = 64;
+const size_t BUF_INCR = 16;
 
 const int NORMAL_KEYS_LEN = 96;
 const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
 
-typedef struct CurPos_s {
-    int y;
-    int x;
-    int desired_x;
-} CurPos;
+typedef struct Line_s {
+    char *text;
+    size_t len;
+    size_t cap;
+} Line;
 
-void print_num(int y, int x, int num) {
+typedef struct FileProxy_s {
+    Line **lines;
+    size_t len;
+} FileProxy;
+
+void print_num(int y, int x, int num) { //FIXME remove
         move(y, x);
         char str[3];
         sprintf(str, "%d", num);
         printw(str);
 }
 
-CurPos move_up(char *buffer, size_t *buf_idx, CurPos pos) {
-    size_t i = *buf_idx;
-    if (buffer[i] == '\n') {
-        // we are currently on an empty line
-        i--;
-    } else {
-        // move to the beginning of the current line
-        while (buffer[i] != '\n') {
-            if (i == 0) {
-                return pos; // can't move up, first line
-            }
-            i--;
+FileProxy split_buffer(char *buffer, size_t buf_len) {
+    // FIXME extra newline at the end of the file
+    // FIXME all lines except the first have a \n at the beginning of the text array
+    size_t num_lines = 1;
+    for (size_t i = 0; i < buf_len; i++) {
+        if (buffer[i] == '\n' && i != buf_len - 1) {
+            num_lines++;
         }
     }
-    i--; // move past the \n at the end of the above line
+    Line **lines = malloc(sizeof(Line *) * num_lines);
+    size_t lines_idx = 0;
 
-    // keep going, counting the entire length of the above line
-    size_t above_line_length = 0;
-    while (i > 0 && buffer[i] != '\n') {
-        above_line_length++;
-        i--;
-    }
+    // create the first line
+    Line *line = malloc(sizeof(Line));
+    size_t byte = sizeof(unsigned char);
+    char *text = malloc(sizeof(BUF_INCR * byte) + 1); // +1 for terminating null byte
+    Line new_line = {text, 0, BUF_INCR};
+    *line = new_line;
+    lines[lines_idx] = line;
 
-    // if the above line length is >= your desired x
-    if (above_line_length >= pos.desired_x) {
-        // move that many spaces from the beginning of the above line
-        // TODO word wrap and text extending past right edge
-        *buf_idx = i + pos.desired_x;
-        CurPos new_pos = {pos.y-1, pos.desired_x, pos.desired_x};
-        return new_pos;
-    } else { // if not, move to the end of the above line
-        *buf_idx = i + above_line_length;
-        CurPos new_pos = {pos.y-1, above_line_length, pos.desired_x};
-        return new_pos;
-    }
-}
-
-CurPos move_down(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
-    // loop forward through the buffer until you hit a new line
-    size_t i = *buf_idx;
-    if (buffer[i] == '\n') {
-        // we are currently on an empty line
-        i++;
-    } else {
-        // move to the end of the current line
-        while (buffer[i] != '\n') {
-            if (i == buf_size - 1) {
-                return pos; // can't move down, last line
+    for (size_t i = 0; i < buf_len; i++) {
+        // create a new line
+        if (buffer[i] == '\n') {
+            Line *line = malloc(sizeof(Line));
+            size_t byte = sizeof(unsigned char);
+            char *text = malloc(sizeof(BUF_INCR * byte) + 1); // +1 for terminating null byte
+            Line new_line = {text, 0, BUF_INCR};
+            *line = new_line;
+            lines[lines_idx+1] = line;
+            lines_idx++;
+        } else {
+            // increase the text buffer size of the line if it is full
+            size_t text_len = lines[lines_idx]->len;
+            size_t cap = lines[lines_idx]->cap;
+            size_t byte = sizeof(unsigned char);
+            if (text_len == cap) {
+                lines[lines_idx]->text = realloc(lines[lines_idx]->text, text_len + (BUF_INCR * byte) + 1);
+                lines[lines_idx]->cap = text_len + BUF_INCR;
             }
-            i++;
+
+            // add a character on to the line
+            lines[lines_idx]->text[text_len] = buffer[i];
+            lines[lines_idx]->text[text_len+1] = '\0';
+            lines[lines_idx]->len = text_len + 1;
         }
     }
-    i++; // move past the \n at the end of the current line
-
-    // keep going, counting the entire length of the below line
-    size_t below_line_length = 0;
-    while (buffer[i] != '\n' && i < buf_size) {
-        below_line_length++;
-        i++;
-    }
-
-    // if the below line length is >= your desired x
-    if (below_line_length >= pos.desired_x) {
-        // move that many spaces from the beginning of the below line
-        // TODO word wrap and text extending past right edge
-        *buf_idx = i - (below_line_length - pos.desired_x);
-        CurPos new_pos = {pos.y+1, pos.desired_x, pos.desired_x};
-        return new_pos;
-    } else { // if not, move to the end of the below line
-        *buf_idx = i - 1;
-        CurPos new_pos = {pos.y+1, below_line_length - 1, pos.desired_x};
-        return new_pos;
-    }
+    FileProxy fp = {lines, num_lines};
+    return fp;
 }
 
-// TODO in the move left and right functions, you will have to update the desired_x to be the new current x
-CurPos move_right(char *buffer, size_t buf_size, size_t *buf_idx, CurPos pos) {
-    if (*buf_idx + 1 != buf_size && buffer[*buf_idx+1] != '\n') {
-        *buf_idx += 1;
-        CurPos new_pos = {pos.y, pos.x+1, pos.x+1};
-        return new_pos;
+void print_file(FileProxy fp) {
+    for (size_t i = 0; i < fp.len; i++) {
+        Line line = *fp.lines[i];
+        printf("len: %lu\ncap: %lu\n", line.len, line.cap);
+        for (size_t j = 0; j < line.len; j++) {
+            if (line.text[j] == '\n') {
+                printf("newline");
+            } else {
+                putchar(line.text[j]);
+            }
+        }
+        putchar('\n');
     }
-    return pos;
-}
-
-CurPos move_left(char *buffer, size_t *buf_idx, CurPos pos) {
-    if (*buf_idx != 0 && buffer[*buf_idx-1] != '\n') {
-        *buf_idx -= 1;
-        CurPos new_pos = {pos.y, pos.x-1, pos.x-1};
-        return new_pos;
-    }
-    return pos;
 }
 
 void loop(char *buffer, size_t buf_size) {
-    CurPos pos = {0, 0, 0};
-    size_t buf_idx = 0;
     printw(buffer);
     refresh();
     while (1) {
-        move(pos.y, pos.x);
+//        move(pos.y, pos.x);
         int key = getch();
         switch (key) {
             case KEY_UP:
-                pos = move_up(buffer, &buf_idx, pos);
+//                pos = move_up(buffer, &buf_idx, pos);
                 break;
             case KEY_DOWN:
-                pos = move_down(buffer, buf_size, &buf_idx, pos);
+//                pos = move_down(buffer, buf_size, &buf_idx, pos);
                 break;
             case KEY_RIGHT:
-                pos = move_right(buffer, buf_size, &buf_idx, pos);
+//                pos = move_right(buffer, buf_size, &buf_idx, pos);
                 break;
             case KEY_LEFT:
-                pos = move_left(buffer, &buf_idx, pos);
+//                pos = move_left(buffer, &buf_idx, pos);
                 break;
         }
-        print_num(20, 20, buf_idx);
         // text insertion
 //        for (int i = 0; i < NORMAL_KEYS_SIZE; i++) {
 //            if (key == NORMAL_KEYS[i]) {
@@ -174,23 +147,19 @@ int main(int argc, char *argv[]) {
 
     // move file into buffer
     size_t byte = sizeof(unsigned char);
-    size_t buf_size = file_size + BUF_INCR;
-    char *buffer = malloc(buf_size);
-    fread(buffer, byte, buf_size / byte, file);
+    char *buffer = malloc(file_size);
+    fread(buffer, byte, file_size / byte, file);
     fclose(file);
+
+    // split buffer into array of Lines
+    FileProxy fp = split_buffer(buffer, file_size / byte);
+    print_file(fp);
 
     initscr();
     keypad(stdscr, TRUE);
 
     // main program loop
-    loop(buffer, buf_size);
-//    for (int i = 0; i < buf_size; i++) {
-//        if (buffer[i] == '\n') {
-//            printf("newline");
-//        } else {
-//            printf("%c", buffer[i]);
-//        }
-//    }
+//    loop(buffer, buf_size);
 
     free(buffer);
     endwin();
