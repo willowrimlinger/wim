@@ -22,7 +22,7 @@ Pos move_up(FileProxy fp, Pos pos) {
     }
     size_t above_len = fp.lines[pos.line-1]->len;
     Pos new_pos = {pos.line - 1, pos.desired_ch, pos.desired_ch};
-    if (above_len < pos.desired_ch) {
+    if (above_len <= pos.desired_ch) {
         new_pos.ch = above_len - 1;
     }
     if (above_len == 0) {
@@ -38,7 +38,7 @@ Pos move_down(FileProxy fp, Pos pos) {
     }
     size_t below_len = fp.lines[pos.line+1]->len;
     Pos new_pos = {pos.line+1, pos.desired_ch, pos.desired_ch};
-    if (below_len < pos.desired_ch) {
+    if (below_len <= pos.desired_ch) {
         new_pos.ch = below_len - 1;
     }
     if (below_len == 0) {
