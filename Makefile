@@ -8,7 +8,7 @@ DEPS = $(wildcard *.h)
 OBJ = $(patsubst %.c, %.o, $(wildcard *.c))
 
 
-$(ODIR)/%.o: %.c $(DEPS)
+%.o: %.c $(DEPS)
 		$(CC) -c -o $@ $< $(CFLAGS)
 
 mim: $(OBJ)
