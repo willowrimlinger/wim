@@ -12,6 +12,7 @@
 
 #include "fileproxy.h"
 #include "motions.h"
+#include "insert.h"
 
 const int NORMAL_KEYS_LEN = 96;
 const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
@@ -28,6 +29,7 @@ void loop(FileProxy fp) {
     print_fp(fp);
     refresh();
     while (1) {
+        // movement
         move_cur(pos);
         int key = getch();
         switch (key) {
@@ -45,11 +47,11 @@ void loop(FileProxy fp) {
                 break;
         }
         // text insertion
-//        for (int i = 0; i < NORMAL_KEYS_SIZE; i++) {
-//            if (key == NORMAL_KEYS[i]) {
-//
-//            }
-//        }
+        for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
+            if (key == NORMAL_KEYS[i]) {
+                pos = insert_char(key, fp, pos);
+            }
+        }
     }
 }
 

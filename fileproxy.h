@@ -16,7 +16,8 @@
 
 typedef struct Line_s {
     char *text;
-    size_t len;
+    size_t num;
+    size_t len; // the number of characters in the line. doesn't count the \0.
     size_t cap;
 } Line;
 
@@ -25,7 +26,7 @@ typedef struct FileProxy_s {
     size_t len;
 } FileProxy;
 
-Line *create_line();
+Line *create_line(size_t line_num);
 
 void check_and_realloc_line(Line *line);
 
