@@ -25,7 +25,11 @@ typedef struct FileProxy_s {
     size_t len;
 } FileProxy;
 
-FileProxy split_buffer(char *buffer, size_t buf_len); 
+Line *create_line();
+
+void check_and_realloc_line(Line *line);
+
+FileProxy split_buffer(const char *buffer, size_t buf_len); 
 
 void free_fp(FileProxy fp);
 
