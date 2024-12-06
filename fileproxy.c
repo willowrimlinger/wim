@@ -39,7 +39,7 @@ void check_and_realloc_line(Line *line) {
         if (tmp != NULL) {
             line->text = tmp;
         } else {
-            perror("Error reallocating space for line text");
+            perror("Error reallocating space for line text.\n");
             exit(EXIT_FAILURE);
         }
         line->cap = line->len + TEXT_BUF_INCR;

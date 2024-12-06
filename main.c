@@ -24,7 +24,7 @@ void print_num(int y, int x, int num) { //FIXME remove
         printw(str);
 }
 
-void loop(FileProxy fp) {
+static void loop(FileProxy fp) {
     Pos pos = {0, 0, 0};
     print_fp(fp);
     refresh();
@@ -58,14 +58,14 @@ void loop(FileProxy fp) {
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Usage: wim <filename>\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // open file
     FILE *file = fopen(argv[1], "r");
     if (file == NULL) {
         printf("File \"%s\" not found.\n", argv[1]);
-        return 1;
+        return EXIT_FAILURE;
     }
     // get file size
     fseek(file, 0, SEEK_END);
@@ -93,5 +93,5 @@ int main(int argc, char *argv[]) {
 
     free_fp(fp);
     endwin();
-    return 0;
+    return EXIT_SUCCESS;
 }
