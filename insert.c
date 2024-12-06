@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include "types.h"
 #include "fileproxy.h"
 #include "motions.h"
 
@@ -19,24 +20,24 @@
  * @param fp the FileProxy to edit
  * @return the new cursor position after inserting
  */
-Pos insert_char(char ch, FileProxy fp, Pos pos) {
-    Line *line = fp.lines[pos.line];
+View insert_char(char ch, FileProxy fp, View view) {
+    Line *line = fp.lines[view.cur_line];
     check_and_realloc_line(line);
     
     // move every char after ch over 1
-    char *src = line->text + pos.ch; // cheeky pointer arithmetic
+    char *src = line->text + view.cur_ch; // cheeky pointer arithmetic
     char *dest = src + 1;
-    memmove(dest, src, line->len - pos.ch + 1); // +1 for \0
+    memmove(dest, src, line->len - view.cur_ch + 1); // +1 for \0
     
     // update length
     line->len = line->len + 1;
 
     // insert char
-    line->text[pos.ch] = ch;
+    line->text[view.cur_ch] = ch;
 
     // update display
     print_line(line);
 
     // move cursor
-    return move_right(fp, pos);
+    return move_right(fp, view);
 }

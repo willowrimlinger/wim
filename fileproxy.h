@@ -14,17 +14,7 @@
 
 #include <stdlib.h>
 
-typedef struct Line_s {
-    char *text;
-    size_t num;
-    size_t len; // the number of characters in the line. doesn't count the \0.
-    size_t cap;
-} Line;
-
-typedef struct FileProxy_s {
-    Line **lines;
-    size_t len;
-} FileProxy;
+#include "types.h"
 
 Line *create_line(size_t line_num);
 
@@ -34,7 +24,7 @@ FileProxy split_buffer(const char *buffer, size_t buf_len);
 
 void free_fp(FileProxy fp);
 
-void print_fp(FileProxy fp);
+void print_fp(FileProxy fp, View view);
 
 void print_line(Line *line);
 

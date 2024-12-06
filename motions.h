@@ -11,24 +11,18 @@
 
 #include <stdlib.h>
 
+#include "types.h"
 #include "fileproxy.h"
 
-/** Represents a cursor position in a file */
-typedef struct Pos_s {
-    size_t line;
-    size_t ch;
-    size_t desired_ch;
-} Pos;
+void move_cur(View view);
 
-void move_cur(Pos pos);
+View move_up(FileProxy fp, View view);
 
-Pos move_up(FileProxy fp, Pos pos);
+View move_down(FileProxy fp, View view);
 
-Pos move_down(FileProxy fp, Pos pos);
+View move_left(View view);
 
-Pos move_left(Pos pos);
-
-Pos move_right(FileProxy fp, Pos pos);
+View move_right(FileProxy fp, View view);
 
 #endif
 

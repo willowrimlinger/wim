@@ -10,46 +10,49 @@
 #include <string.h>
 #include <ncurses.h>
 
+#include "types.h"
 #include "fileproxy.h"
 #include "motions.h"
 #include "insert.h"
 
-const int NORMAL_KEYS_LEN = 96;
-const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
+static const int NORMAL_KEYS_LEN = 96;
+static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
 
 void print_num(int y, int x, int num) { //FIXME remove
         move(y, x);
+        clrtoeol();
         char str[3];
         sprintf(str, "%d", num);
         printw(str);
 }
 
 static void loop(FileProxy fp) {
-    Pos pos = {0, 0, 0};
-    print_fp(fp);
+    View view = {0, 0, 0, 0, 0};
+    print_fp(fp, view);
     refresh();
     while (1) {
         // movement
-        move_cur(pos);
+        print_num(30, 30, view.left_ch);
+        move_cur(view);
         int key = getch();
         switch (key) {
             case KEY_UP:
-                pos = move_up(fp, pos);
+                view = move_up(fp, view);
                 break;
             case KEY_DOWN:
-                pos = move_down(fp, pos);
+                view = move_down(fp, view);
                 break;
             case KEY_LEFT:
-                pos = move_left(pos);
+                view = move_left(view);
                 break;
             case KEY_RIGHT:
-                pos = move_right(fp, pos);
+                view = move_right(fp, view);
                 break;
         }
         // text insertion
         for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
             if (key == NORMAL_KEYS[i]) {
-                pos = insert_char(key, fp, pos);
+                view = insert_char(key, fp, view);
             }
         }
     }
@@ -82,7 +85,6 @@ int main(int argc, char *argv[]) {
     // split buffer into array of Lines
     FileProxy fp = split_buffer(buffer, file_size / byte);
     free(buffer);
-    print_fp(fp);
 
     initscr();
     keypad(stdscr, TRUE);

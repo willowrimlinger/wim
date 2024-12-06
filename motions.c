@@ -8,61 +8,102 @@
 #include <stdlib.h>
 #include <ncurses.h>
 
+#include "types.h"
 #include "motions.h"
 
-void move_cur(Pos pos) {
-    // TODO text wrapping, text overflow
-    move(pos.line, pos.ch);
+void move_cur(View view) {
+    // TODO error if line or char is off screen
+    move(view.cur_line - view.top_line, view.cur_ch - view.left_ch);
 }
 
-Pos move_up(FileProxy fp, Pos pos) {
-    if (pos.line == 0) {
+View move_up(FileProxy fp, View view) {
+    if (view.cur_line == 0) {
         // can't move up, first line
-        return pos;
+        return view;
     }
-    size_t above_len = fp.lines[pos.line-1]->len;
-    Pos new_pos = {pos.line - 1, pos.desired_ch, pos.desired_ch};
-    if (above_len <= pos.desired_ch) {
-        new_pos.ch = above_len - 1;
+    size_t above_len = fp.lines[view.cur_line-1]->len;
+    View new_view = {
+        view.top_line,
+        view.left_ch,
+        view.cur_line - 1,
+        view.cur_desired_ch,
+        view.cur_desired_ch
+    };
+    if (view.cur_line == view.top_line) {
+        // scroll up
+        new_view.top_line -= 1;
+    }
+    if (above_len <= view.cur_desired_ch) {
+        new_view.cur_ch = above_len - 1;
     }
     if (above_len == 0) {
-        new_pos.ch = 0;
+        new_view.cur_ch = 0;
     }
-    return new_pos;
+    return new_view;
 }
 
-Pos move_down(FileProxy fp, Pos pos) {
-    if (pos.line == fp.len - 1) {
+View move_down(FileProxy fp, View view) {
+    if (view.cur_line == fp.len - 1) {
         // can't move down, last line
-        return pos;
+        return view;
     }
-    size_t below_len = fp.lines[pos.line+1]->len;
-    Pos new_pos = {pos.line+1, pos.desired_ch, pos.desired_ch};
-    if (below_len <= pos.desired_ch) {
-        new_pos.ch = below_len - 1;
+    size_t below_len = fp.lines[view.cur_line+1]->len;
+    View new_view = {
+        view.top_line,
+        view.left_ch,
+        view.cur_line+1,
+        view.cur_desired_ch,
+        view.cur_desired_ch
+    };
+    if (view.cur_line == view.top_line + LINES - 1) {
+        // scroll down
+        view.top_line += 1;
+    }
+    if (below_len <= view.cur_desired_ch) {
+        new_view.cur_ch = below_len - 1;
     }
     if (below_len == 0) {
-        new_pos.ch = 0;
+        new_view.cur_ch = 0;
     }
-    return new_pos;
+    return new_view;
 }
 
-Pos move_left(Pos pos) {
-    if (pos.ch == 0) {
+View move_left(View view) {
+    if (view.cur_ch == 0) {
         // can't move left, beginning of line
-        return pos;
+        return view;
     }
-    Pos new_pos = {pos.line, pos.ch - 1, pos.ch - 1};
-    return new_pos;
+    View new_view = {
+        view.top_line,
+        view.left_ch,
+        view.cur_line,
+        view.cur_ch - 1,
+        view.cur_ch - 1
+    };
+    if (view.cur_ch == view.left_ch) {
+        // scroll left
+        new_view.left_ch -= 1;
+    }
+    return new_view;
 }
 
-Pos move_right(FileProxy fp, Pos pos) {
-    if (pos.ch == fp.lines[pos.line]->len - 1 ||
-            fp.lines[pos.line]->len == 0) {
+View move_right(FileProxy fp, View view) {
+    if (view.cur_ch == fp.lines[view.cur_line]->len - 1 ||
+            fp.lines[view.cur_line]->len == 0) {
         // can't move right, end of line or empty line
-        return pos;
+        return view;
     }
-    Pos new_pos = {pos.line, pos.ch + 1, pos.ch + 1};
-    return new_pos;
+    View new_view = {
+        view.top_line,
+        view.left_ch,
+        view.cur_line,
+        view.cur_ch + 1,
+        view.cur_ch + 1
+    };
+    if (view.cur_ch == view.left_ch + COLS - 1) {
+        // scroll right
+        view.left_ch += 1;
+    }
+    return new_view;
 }
 
