@@ -10,10 +10,12 @@
 #include <stdio.h>
 #include <ncurses.h>
 
+#include "types.h"
 #include "fileproxy.h"
+#include "motions.h"
 
-const size_t byte = sizeof(unsigned char);
-const size_t TEXT_BUF_INCR = 16;
+static const size_t byte = sizeof(unsigned char);
+static const size_t TEXT_BUF_INCR = 16;
 
 /**
  * Creates a new empty Line with a beginning buffer capacity of TEXT_BUF_INCR
@@ -110,11 +112,11 @@ void free_fp(FileProxy fp) {
  *
  * @param fp the FileProxy to print
  */
-void print_fp(FileProxy fp) {
-    for (size_t i = 0; i < fp.len; i++) {
+void print_fp(FileProxy fp, View view) {
+    for (size_t i = view.top_line; i < fp.len; i++) {
         Line line = *fp.lines[i];
-        for (size_t j = 0; j < line.len; j++) {
-            mvaddch(i, j, line.text[j]);
+        for (size_t j = view.left_ch; j < line.len; j++) {
+            mvaddch(i - view.top_line, j - view.left_ch, line.text[j]);
         }
     }
 }
