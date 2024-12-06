@@ -26,7 +26,7 @@ void free_fp(FileProxy fp);
 
 void print_fp(FileProxy fp, View view);
 
-void print_line(Line *line);
+void print_line(Line *line, View view);
 
 #endif
 

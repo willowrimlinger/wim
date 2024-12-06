@@ -57,7 +57,7 @@ View move_down(FileProxy fp, View view) {
     };
     if (view.cur_line == view.top_line + LINES - 1) {
         // scroll down
-        view.top_line += 1;
+        new_view.top_line += 1;
     }
     if (below_len <= view.cur_desired_ch) {
         new_view.cur_ch = below_len - 1;
@@ -102,7 +102,7 @@ View move_right(FileProxy fp, View view) {
     };
     if (view.cur_ch == view.left_ch + COLS - 1) {
         // scroll right
-        view.left_ch += 1;
+        new_view.left_ch += 1;
     }
     return new_view;
 }
