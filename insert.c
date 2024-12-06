@@ -27,11 +27,15 @@ Pos insert_char(char ch, FileProxy fp, Pos pos) {
     char *src = line->text + pos.ch; // cheeky pointer arithmetic
     char *dest = src + 1;
     memmove(dest, src, line->len - pos.ch + 1); // +1 for \0
+    
+    // update length
+    line->len = line->len + 1;
 
     // insert char
     line->text[pos.ch] = ch;
 
     // update display
+    print_line(line);
 
     // move cursor
     return move_right(fp, pos);

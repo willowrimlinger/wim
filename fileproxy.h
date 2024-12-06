@@ -36,5 +36,7 @@ void free_fp(FileProxy fp);
 
 void print_fp(FileProxy fp);
 
+void print_line(Line *line);
+
 #endif
 

@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
 
     initscr();
     keypad(stdscr, TRUE);
+    noecho();
 
     // main program loop
     loop(fp);
