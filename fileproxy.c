@@ -69,8 +69,8 @@ FileProxy split_buffer(const char *buffer, size_t buf_len) {
     for (size_t i = 0; i < buf_len - 1; i++) {
         // create a new line
         if (buffer[i] == '\n') {
-            Line *line = create_line(lines_idx);
             lines_idx++;
+            Line *line = create_line(lines_idx);
             lines[lines_idx] = line;
         } else {
             // increase the text buffer size of the line if it is full
@@ -124,9 +124,10 @@ void print_fp(FileProxy fp) {
  *
  * @param line the Line to rerender
  */
-void print_fp_line(Line *line) {
+void print_line(Line *line) {
     for (size_t i = 0; i < line->len; i++) {
-        mvaddch(line->num, i, line.text[i]);
+        mvaddch(line->num, i, line->text[i]);
     }
+    clrtoeol();
 }
 
