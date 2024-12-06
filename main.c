@@ -32,7 +32,7 @@ static void loop(FileProxy fp) {
     refresh();
     while (1) {
         // movement
-        print_num(30, 30, view.left_ch);
+        print_num(30, 30, view.top_line);
         move_cur(view);
         int key = getch();
         switch (key) {

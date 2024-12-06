@@ -126,9 +126,9 @@ void print_fp(FileProxy fp, View view) {
  *
  * @param line the Line to rerender
  */
-void print_line(Line *line) {
-    for (size_t i = 0; i < line->len; i++) {
-        mvaddch(line->num, i, line->text[i]);
+void print_line(Line *line, View view) {
+    for (size_t i = view.left_ch; i < line->len; i++) {
+        mvaddch(view.top_line + line->num, i, line->text[i]);
     }
     clrtoeol();
 }

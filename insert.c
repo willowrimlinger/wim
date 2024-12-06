@@ -36,7 +36,7 @@ View insert_char(char ch, FileProxy fp, View view) {
     line->text[view.cur_ch] = ch;
 
     // update display
-    print_line(line);
+    print_line(line, view);
 
     // move cursor
     return move_right(fp, view);
