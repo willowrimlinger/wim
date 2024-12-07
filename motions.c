@@ -33,7 +33,7 @@ View move_up(FileProxy fp, View view) {
         new_view.top_line -= 1;
     }
     if (above_len <= view.cur_desired_ch) {
-        new_view.cur_ch = above_len - 1;
+        new_view.cur_ch = above_len;
     }
     if (above_len == 0) {
         new_view.cur_ch = 0;
@@ -65,7 +65,7 @@ View move_down(FileProxy fp, View view) {
         new_view.top_line += 1;
     }
     if (below_len <= view.cur_desired_ch) {
-        new_view.cur_ch = below_len - 1;
+        new_view.cur_ch = below_len;
     }
     if (below_len == 0) {
         new_view.cur_ch = 0;
@@ -99,9 +99,8 @@ View move_left(FileProxy fp, View view) {
 }
 
 View move_right(FileProxy fp, View view) {
-    if (view.cur_ch == fp.lines[view.cur_line]->len - 1 ||
-            fp.lines[view.cur_line]->len == 0) {
-        // can't move right, end of line or empty line
+    if (view.cur_ch == fp.lines[view.cur_line]->len) {
+        // can't move right, end of line
         return view;
     }
     View new_view = {
