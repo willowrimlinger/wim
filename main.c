@@ -17,7 +17,7 @@
 #include "insert.h"
 
 static const int NORMAL_KEYS_LEN = 96;
-static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>?";
+static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>? ";
 
 void print_num(int y, int x, int num) { //FIXME remove
         move(y, x);
@@ -32,7 +32,6 @@ static void loop(FileProxy fp) {
     View view = {0, 0, 0, 0, 0};
     while (1) {
         print_fp(fp, view);
-        print_num(20, 20, view.left_ch);
         move_cur(view);
         refresh();
         int key = getch();
@@ -49,6 +48,11 @@ static void loop(FileProxy fp) {
             case KEY_RIGHT:
                 view = move_right(fp, view);
                 break;
+            case KEY_END:
+                view = move_to_eol(fp, view);
+                break;
+            case KEY_HOME:
+                view = move_to_bol(fp, view);
         }
         // text insertion
         for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
