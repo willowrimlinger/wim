@@ -43,7 +43,7 @@ static void loop(FileProxy fp) {
                 view = move_down(fp, view);
                 break;
             case KEY_LEFT:
-                view = move_left(view);
+                view = move_left(fp, view);
                 break;
             case KEY_RIGHT:
                 view = move_right(fp, view);
