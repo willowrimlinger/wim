@@ -20,7 +20,7 @@ View move_up(FileProxy fp, View view);
 
 View move_down(FileProxy fp, View view);
 
-View move_left(View view);
+View move_left(FileProxy fp, View view);
 
 View move_right(FileProxy fp, View view);
 

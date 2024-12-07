@@ -113,6 +113,7 @@ void free_fp(FileProxy fp) {
  * @param fp the FileProxy to print
  */
 void print_fp(FileProxy fp, View view) {
+    clear();
     for (size_t i = view.top_line; i < fp.len; i++) {
         Line line = *fp.lines[i];
         for (size_t j = view.left_ch; j < line.len; j++) {
