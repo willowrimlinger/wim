@@ -32,6 +32,7 @@ static void loop(FileProxy fp) {
     View view = {0, 0, 0, 0, 0};
     while (1) {
         print_fp(fp, view);
+        print_num(20, 20, view.left_ch);
         move_cur(view);
         refresh();
         int key = getch();
