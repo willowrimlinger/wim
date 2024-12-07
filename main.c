@@ -10,6 +10,7 @@
 #include <string.h>
 #include <ncurses.h>
 
+#include "log.h"
 #include "types.h"
 #include "fileproxy.h"
 #include "motions.h"
@@ -27,13 +28,12 @@ void print_num(int y, int x, int num) { //FIXME remove
 }
 
 static void loop(FileProxy fp) {
+    log_to_file("========================================================");
     View view = {0, 0, 0, 0, 0};
-    print_fp(fp, view);
-    refresh();
     while (1) {
-        // movement
-        print_num(30, 30, view.top_line);
+        print_fp(fp, view);
         move_cur(view);
+        refresh();
         int key = getch();
         switch (key) {
             case KEY_UP:
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     // open file
     FILE *file = fopen(argv[1], "r");
     if (file == NULL) {
-        printf("File \"%s\" not found.\n", argv[1]);
+        fprintf(stderr, "File \"%s\" not found.\n", argv[1]);
         return EXIT_FAILURE;
     }
     // get file size
