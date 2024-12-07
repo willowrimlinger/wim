@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <ncurses.h>
 
+#include "log.h"
 #include "types.h"
 #include "fileproxy.h"
 #include "motions.h"
@@ -41,7 +42,7 @@ void check_and_realloc_line(Line *line) {
         if (tmp != NULL) {
             line->text = tmp;
         } else {
-            perror("Error reallocating space for line text.\n");
+            fprintf(stderr, "Error reallocating space for line text.\n");
             exit(EXIT_FAILURE);
         }
         line->cap = line->len + TEXT_BUF_INCR;
@@ -113,24 +114,12 @@ void free_fp(FileProxy fp) {
  * @param fp the FileProxy to print
  */
 void print_fp(FileProxy fp, View view) {
-    clear();
+    erase();
     for (size_t i = view.top_line; i < fp.len; i++) {
         Line line = *fp.lines[i];
         for (size_t j = view.left_ch; j < line.len; j++) {
             mvaddch(i - view.top_line, j - view.left_ch, line.text[j]);
         }
     }
-}
-
-/**
- * Rerenders the contents of a Line to the ncurses stdscr
- *
- * @param line the Line to rerender
- */
-void print_line(Line *line, View view) {
-    for (size_t i = view.left_ch; i < line->len; i++) {
-        mvaddch(view.top_line + line->num, i, line->text[i]);
-    }
-    clrtoeol();
 }
 
