@@ -11,6 +11,8 @@
 #include "fileproxy.h"
 #include "motions.h"
 
+static const size_t byte = sizeof(unsigned char);
+
 /**
  * Inserts one character into the file at the given cursor position and moves the
  * cursor over one.
@@ -20,21 +22,43 @@
  * @param fp the FileProxy to edit
  * @return the new cursor position after inserting
  */
-View insert_char(char ch, FileProxy fp, View view) {
-    Line *line = fp.lines[view.cur_line];
+View insert_char(char ch, FileProxy *fp, View view) {
+    Line *line = fp->lines[view.cur_line];
     check_and_realloc_line(line);
     
     // move every char after ch over 1
     char *src = line->text + view.cur_ch; // cheeky pointer arithmetic
     char *dest = src + 1;
-    memmove(dest, src, line->len - view.cur_ch + 1); // +1 for \0
+    memmove(dest, src, line->len - (view.cur_ch * byte) + 1); // +1 for \0
     
     // update length
-    line->len = line->len + 1;
+    line->len += 1;
 
     // insert char
     line->text[view.cur_ch] = ch;
 
     // move cursor
-    return move_right(fp, view);
+    return move_right(*fp, view);
 }
+
+View insert_newline(FileProxy *fp, View view) {
+    // move every line after the current down 1
+    Line *src = fp->lines + view.cur_line + 1;
+    Line *dest = src + 1;
+    memmove(dest, src, (fp->len - (view.cur_line + 1)) * sizeof(Line *));
+
+    // update length
+    fp->len += 1;
+
+    // insert new line
+    fp->lines[view.cur_line+1] = create_line(view.cur_line + 1);
+
+    // update the line numbers of each subsequent line
+    for (size_t i = view.cur_line + 2; i < fp->len; i++) {
+        fp->lines[i]->num += 1;
+    }
+
+    // remove the text from the cursor to eol of current line and put it in the newline
+    // TODO ooh you're gonna have to decrease the buffer of the current line
+}
+
