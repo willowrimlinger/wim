@@ -12,7 +12,6 @@
 #include "motions.h"
 
 void move_cur(View view) {
-    // TODO if cursor is off screen, pan screen so that you can see it
     move(view.cur_line - view.top_line, view.cur_ch - view.left_ch);
 }
 
@@ -39,6 +38,12 @@ View move_up(FileProxy fp, View view) {
     if (above_len == 0) {
         new_view.cur_ch = 0;
     }
+    // handle scrolling horizontally when desired_ch is off screen
+    if (new_view.cur_ch < new_view.left_ch) {
+        new_view.left_ch = new_view.cur_ch;
+    } else if (new_view.cur_ch > new_view.left_ch + COLS - 1) {
+        new_view.left_ch = new_view.cur_ch - (COLS - 1);
+    }
     return new_view;
 }
 
@@ -64,6 +69,12 @@ View move_down(FileProxy fp, View view) {
     }
     if (below_len == 0) {
         new_view.cur_ch = 0;
+    }
+    // handle scrolling horizontally when desired_ch is off screen
+    if (new_view.cur_ch < new_view.left_ch) {
+        new_view.left_ch = new_view.cur_ch;
+    } else if (new_view.cur_ch > new_view.left_ch + COLS - 1) {
+        new_view.left_ch = new_view.cur_ch - (COLS - 1);
     }
     return new_view;
 }
