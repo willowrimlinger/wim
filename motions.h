@@ -24,5 +24,9 @@ View move_left(FileProxy fp, View view);
 
 View move_right(FileProxy fp, View view);
 
+View move_to_eol(FileProxy fp, View view);
+
+View move_to_bol(FileProxy fp, View view);
+
 #endif
 
