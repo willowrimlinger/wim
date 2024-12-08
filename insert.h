@@ -14,4 +14,6 @@
 
 View insert_char(char ch, FileProxy fp, View view);
 
+View insert_newline(FileProxy fp, View view);
+
 #endif

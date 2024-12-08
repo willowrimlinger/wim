@@ -18,7 +18,7 @@
 
 Line *create_line(size_t line_num);
 
-void check_and_realloc_line(Line *line);
+void check_and_realloc_line(Line *line, size_t additional_text_len);
 
 FileProxy split_buffer(const char *buffer, size_t buf_len); 
 

@@ -5,10 +5,11 @@ LIBS=-lncurses
 
 DEPS = $(wildcard *.h)
 
-OBJ = $(patsubst %.c, %.o, $(wildcard *.c))
+OBJ_DIR = obj
+OBJ = $(patsubst %.c, $(OBJ_DIR)/%.o, $(wildcard *.c))
 
 
-%.o: %.c $(DEPS)
+$(OBJ_DIR)/%.o: %.c $(DEPS)
 		$(CC) -c -o $@ $< $(CFLAGS)
 
 mim: $(OBJ)
@@ -17,5 +18,5 @@ mim: $(OBJ)
 .PHONY: clean
 
 clean:
-		rm -f *.o
+		rm -f $(OBJ_DIR)/*.o
 		rm -f mim
