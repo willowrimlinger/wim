@@ -53,8 +53,10 @@ static void loop(FileProxy fp) {
                 break;
             case KEY_HOME:
                 view = move_to_bol(fp, view);
+                break;
             case KEY_ENTER:
                 view = insert_newline(fp, view);
+                break;
         }
         // text insertion
         for (int i = 0; i < NORMAL_KEYS_LEN; i++) {

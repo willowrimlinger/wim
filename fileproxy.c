@@ -32,20 +32,24 @@ Line *create_line(size_t line_num) {
 }
 
 /**
- * Checks if a give line is full and if so, increases the size of the text buffer.
+ * Adjusts the text buffer of a line. Checks if the given line is full and the 
+ * buffer needs to be increased or if the line has space to reduce the buffer.
  *
  * @param line the line to check and potentially increase
  */
-void check_and_realloc_line(Line *line) {
-    if (line->len == line->cap) {
-        char *tmp = realloc(line->text, line->len + (TEXT_BUF_INCR * byte) + 1);
+void check_and_realloc_line(Line *line, size_t additional_text_len) {
+    // check that we actually need to realloc
+    size_t ideal_num_buffers = (line->len + additional_text_len + 1 / TEXT_BUF_INCR) + 1;
+    size_t actual_num_buffers = (line->cap + 1 / TEXT_BUF_INCR);
+    if (ideal_num_buffers != actual_num_buffers) {
+        char *tmp = realloc(line->text, (ideal_num_buffers * TEXT_BUF_INCR) * byte + 1);
         if (tmp != NULL) {
             line->text = tmp;
         } else {
             fprintf(stderr, "Error reallocating space for line text.\n");
             exit(EXIT_FAILURE);
         }
-        line->cap = line->len + TEXT_BUF_INCR;
+        line->cap = ideal_num_buffers * TEXT_BUF_INCR;
     }
 }
 
@@ -78,7 +82,7 @@ FileProxy split_buffer(const char *buffer, size_t buf_len) {
         } else {
             // increase the text buffer size of the line if it is full
             Line *line = lines[lines_idx];
-            check_and_realloc_line(lines[lines_idx]);
+            check_and_realloc_line(line, 1);
 
             // add a character on to the line
             line->text[line->len] = buffer[i];
