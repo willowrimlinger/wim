@@ -41,6 +41,9 @@ void check_and_realloc_line(Line *line, size_t additional_text_len) {
     // check that we actually need to realloc
     size_t ideal_num_buffers = (line->len + additional_text_len + 1 / TEXT_BUF_INCR) + 1;
     size_t actual_num_buffers = (line->cap + 1 / TEXT_BUF_INCR);
+//    log_to_file("line num:  %d", line->num);
+//    log_to_file("ideal num buffers: %d", ideal_num_buffers);
+//    log_to_file("actual num buffers: %d", actual_num_buffers);
     if (ideal_num_buffers != actual_num_buffers) {
         char *tmp = realloc(line->text, (ideal_num_buffers * TEXT_BUF_INCR) * byte + 1);
         if (tmp != NULL) {
@@ -91,7 +94,19 @@ FileProxy split_buffer(const char *buffer, size_t buf_len) {
         }
     }
     FileProxy fp = {lines, num_lines};
+    log_fp(fp);
     return fp;
+}
+
+/** Debug function to see everything about a FileProxy */
+void log_fp(FileProxy fp) {
+    log_to_file("fileproxy:");
+    for (size_t i = 0; i < fp.len; i++) {
+        log_to_file("line num: %lu", fp.lines[i]->num);
+        log_to_file("len: %lu", fp.lines[i]->len);
+        log_to_file("cap: %lu", fp.lines[i]->cap);
+        log_to_file("text: %s", fp.lines[i]->text);
+    }
 }
 
 /**
