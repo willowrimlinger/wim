@@ -22,6 +22,8 @@ void check_and_realloc_line(Line *line, size_t additional_text_len);
 
 FileProxy split_buffer(const char *buffer, size_t buf_len); 
 
+void log_fp(FileProxy fp);
+
 void free_fp(FileProxy fp);
 
 void print_fp(FileProxy fp, View view);

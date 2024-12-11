@@ -5,4 +5,4 @@
  * Functions to log info to a log file
  */
 
-void log_to_file(const char *msg);
+void log_to_file(const char *fmt, ...);

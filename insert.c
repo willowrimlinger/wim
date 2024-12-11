@@ -64,7 +64,6 @@ View insert_newline(FileProxy *fp, View view) {
     strcpy(fp->lines[view.cur_line+1]->text, fp->lines[view.cur_line]->text + view.cur_ch);
     // remove the text from cursor to eol
     check_and_realloc_line(fp->lines[view.cur_line], -text_to_eol_len);
-
     // move to new line
     return move_down(*fp, view);
 }
