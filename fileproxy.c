@@ -25,7 +25,7 @@ static const size_t TEXT_BUF_INCR = 16;
  */
 Line *create_line(size_t line_num) {
     Line *line = malloc(sizeof(Line));
-    char *text = malloc(TEXT_BUF_INCR * byte + 1); // +1 for terminating null byte
+    char *text = malloc((TEXT_BUF_INCR+ 1) * byte); // +1 for terminating null byte
     Line new_line = {text, line_num, 0, TEXT_BUF_INCR};
     *line = new_line;
     return line;
@@ -34,24 +34,25 @@ Line *create_line(size_t line_num) {
 /**
  * Adjusts the text buffer of a line. Checks if the given line is full and the 
  * buffer needs to be increased or if the line has space to reduce the buffer.
+ * Also increases the length and capacity according to the additional text length.
  *
  * @param line the line to check and potentially increase
+ * @param additional_text_len the number of chars that are being added (or subtracted)
+ *     from the line from which the new buffer calculations will be adjusted to
  */
 void check_and_realloc_line(Line *line, size_t additional_text_len) {
     // check that we actually need to realloc
-    size_t ideal_num_buffers = (line->len + additional_text_len + 1 / TEXT_BUF_INCR) + 1;
-    size_t actual_num_buffers = (line->cap + 1 / TEXT_BUF_INCR);
-//    log_to_file("line num:  %d", line->num);
-//    log_to_file("ideal num buffers: %d", ideal_num_buffers);
-//    log_to_file("actual num buffers: %d", actual_num_buffers);
+    size_t ideal_num_buffers = ((line->len + additional_text_len + 1) / TEXT_BUF_INCR) + 1;
+    size_t actual_num_buffers = ((line->cap + 1) / TEXT_BUF_INCR);
     if (ideal_num_buffers != actual_num_buffers) {
-        char *tmp = realloc(line->text, (ideal_num_buffers * TEXT_BUF_INCR) * byte + 1);
+        char *tmp = realloc(line->text, (ideal_num_buffers * TEXT_BUF_INCR + 1) * byte);
         if (tmp != NULL) {
             line->text = tmp;
         } else {
             fprintf(stderr, "Error reallocating space for line text.\n");
             exit(EXIT_FAILURE);
         }
+        line->len += additional_text_len;
         line->cap = ideal_num_buffers * TEXT_BUF_INCR;
     }
 }
@@ -94,7 +95,6 @@ FileProxy split_buffer(const char *buffer, size_t buf_len) {
         }
     }
     FileProxy fp = {lines, num_lines};
-    log_fp(fp);
     return fp;
 }
 

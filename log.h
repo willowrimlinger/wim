@@ -6,3 +6,5 @@
  */
 
 void log_to_file(const char *fmt, ...);
+
+void clear_log();

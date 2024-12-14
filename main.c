@@ -28,7 +28,6 @@ void print_num(int y, int x, int num) { //FIXME remove
 }
 
 static void loop(FileProxy fp) {
-    log_to_file("========================================================");
     View view = {0, 0, 0, 0, 0};
     while (1) {
         print_fp(fp, view);
@@ -55,19 +54,23 @@ static void loop(FileProxy fp) {
                 view = move_to_bol(fp, view);
                 break;
             case KEY_ENTER:
-                view = insert_newline(fp, view);
+            case '\n':
+            case '\r':
+                view = insert_newline(&fp, view);
                 break;
         }
         // text insertion
         for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
             if (key == NORMAL_KEYS[i]) {
-                view = insert_char(key, fp, view);
+                view = insert_char(key, &fp, view);
             }
         }
     }
 }
 
 int main(int argc, char *argv[]) {
+    clear_log();
+
     if (argc != 2) {
         printf("Usage: wim <filename>\n");
         return EXIT_FAILURE;
