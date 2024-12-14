@@ -18,7 +18,7 @@
 void log_to_file(const char *fmt, ...) {
     FILE *file = fopen("mim.log", "a");
     if (file == NULL) {
-        fprintf(stderr, "File mim.log not found.\n");
+        fprintf(stderr, "Error opening mim.log\n");
     }
 
     time_t curr_time = time(NULL);
@@ -34,4 +34,14 @@ void log_to_file(const char *fmt, ...) {
 
     fclose(file);
     va_end(args);
+}
+
+/** Clears the log file */
+void clear_log() {
+    FILE *file = fopen("mim.log", "w");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening mim.log\n");
+    }
+    fprintf(file, "");
+    fclose(file);
 }
