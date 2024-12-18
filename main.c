@@ -30,7 +30,6 @@ void print_num(int y, int x, int num) { //FIXME remove
 static void loop(FileProxy fp) {
     View view = {0, 0, 0, 0, 0};
     while (1) {
-        log_fp(fp);
         print_fp(fp, view);
         move_cur(view);
         refresh();
@@ -58,6 +57,9 @@ static void loop(FileProxy fp) {
             case '\n':
             case '\r':
                 view = insert_newline(&fp, view);
+                break;
+            case KEY_BACKSPACE:
+                view = backspace(&fp, view);
                 break;
         }
         // text insertion

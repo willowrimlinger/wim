@@ -20,8 +20,8 @@ static const size_t byte = sizeof(unsigned char);
  * cursor over one.
  *
  * @param ch the character to insert
- * @param pos the current cursor position
  * @param fp the FileProxy to edit
+ * @param view the current View
  * @return the new cursor position after inserting
  */
 View insert_char(char ch, FileProxy *fp, View view) {
@@ -41,6 +41,34 @@ View insert_char(char ch, FileProxy *fp, View view) {
     
     // move cursor
     return move_right(*fp, view);
+}
+
+/**
+ * Deletes the character before the cursor position. The cursor moves left one
+ * to stay with the character it was on.
+ *
+ * @param fp the FileProxy to edit
+ * @param view the current View
+ * @return the new view with the cursor moved one left
+ */
+View backspace(FileProxy *fp, View view) {
+    if (view.cur_ch == 0) {
+        return view;
+    }
+
+    Line *line = fp->lines[view.cur_line];
+    check_and_realloc_line(line, -1);
+
+    // move every char from cursor onwards left 1
+    char *src = line->text + view.cur_ch;
+    char *dest = src - 1;
+    memmove(dest, src, (line->len - view.cur_ch + 1) * byte);
+    
+    // update length
+    line->len -= 1;
+    
+    // move cursor
+    return move_left(*fp, view);
 }
 
 View insert_newline(FileProxy *fp, View view) {
@@ -82,8 +110,6 @@ View insert_newline(FileProxy *fp, View view) {
     // remove the text from cursor to eol
     check_and_realloc_line(cur_line, -text_to_eol_len);
     cur_line->len -= text_to_eol_len;
-
-    log_fp(*fp);
 
     // move to new line
     return move_to_bol(*fp, move_down(*fp, view));
