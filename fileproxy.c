@@ -37,7 +37,7 @@ Line *create_line(size_t line_num) {
  * Adjusts the capacity of the line.
  *
  * @param line the line to check and potentially increase
- * @param additional_text_len the number of chars that are being added (or subtracted)
+ * @param additional_text_len the number of chars that are being added (or subtracted), not including \0
  *     from the line from which the new buffer calculations will be adjusted to
  */
 void check_and_realloc_line(Line *line, size_t additional_text_len) {
@@ -131,8 +131,6 @@ void free_fp(FileProxy fp) {
 
 /** 
  * Prints the contents of a FileProxy to the ncurses stdscr
- * TODO breaks if file extends horizontally or vertically past the viewport
- * need to implement either text wrapping, text overflow, or both
  *
  * @param fp the FileProxy to print
  */
@@ -144,5 +142,23 @@ void print_fp(FileProxy fp, View view) {
             mvaddch(i - view.top_line, j - view.left_ch, line.text[j]);
         }
     }
+}
+
+// FIXME acts weird sometimes. duplicates lines or removes them
+void write_fp(FileProxy fp, const char *filename) {
+    log_fp(fp);
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Error saving %s\n", filename);
+    }
+
+    for (size_t i = 0; i < fp.len; i++) {
+        if (fp.lines[i]->len > 0) {
+            fprintf(file, "%s", fp.lines[i]->text);
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
 }
 
