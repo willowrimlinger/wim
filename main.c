@@ -61,7 +61,10 @@ static void loop(FileProxy fp, const char *filename) {
             case KEY_BACKSPACE:
                 view = backspace(&fp, view);
                 break;
-            case KEY_NPAGE: // FIXME
+            case KEY_DC:
+                view = delete(&fp, view);
+                break;
+            case KEY_NPAGE: // FIXME make it something normal
                 write_fp(fp, filename);
                 break;
         }
