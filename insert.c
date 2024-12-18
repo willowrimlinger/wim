@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "types.h"
 #include "fileproxy.h"
@@ -43,6 +44,86 @@ View insert_char(char ch, FileProxy *fp, View view) {
     return move_right(*fp, view);
 }
 
+// FIXME may or may not work
+View delete_line(FileProxy *fp, View view) {
+    if (view.cur_line == 0) {
+        return view;
+    }
+
+    // move subsequent lines up one
+    Line **src = fp->lines + view.cur_line + 1;
+    Line **dest = fp->lines + view.cur_line;
+    memmove(dest, src, (fp->len - (view.cur_line + 1)) * sizeof(Line *));
+
+    // update length
+    fp->len -= 1;
+
+    // update the line numbers of subsequent lines
+    for (size_t i = view.cur_line; i < fp->len; i++) {
+        fp->lines[i]->num -= 1;
+    }
+
+    // shorten lines array
+    Line **tmp = realloc(fp->lines,  fp->len * sizeof(Line *));
+    if (tmp != NULL) {
+        fp->lines = tmp;
+    } else {
+        fprintf(stderr, "Error reallocating space for new line.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return move_up(*fp, view);
+}
+
+/**
+ * Appends the text of the current line to the previous line with no space.
+ * Moves the cursor to the previous line where the newly inserted text begins.
+ *
+ * @param fp the FileProxy to edit
+ * @param view the current View
+ * @return the new cursor position after combining
+ */
+View combine_line_with_prev(FileProxy *fp, View view) {
+    if (view.cur_line == 0) {
+        return view;
+    }
+
+    // move text
+    Line *cur_line = fp->lines[view.cur_line];
+    Line *prev_line = fp->lines[view.cur_line-1];
+    size_t prev_line_len_before_combining = prev_line->len;
+    if (cur_line->len > 0) {
+        // add the text from the current line to the prev line
+        check_and_realloc_line(prev_line, cur_line->len);
+        strcpy(prev_line->text + prev_line->len, cur_line->text);
+        prev_line->len += cur_line->len;
+    }
+
+    // move subsequent lines up one
+    Line **src = fp->lines + view.cur_line + 1;
+    Line **dest = fp->lines + view.cur_line;
+    memmove(dest, src, (fp->len - (view.cur_line + 1)) * sizeof(Line *));
+
+    // update length
+    fp->len -= 1;
+
+    // update the line numbers of subsequent lines
+    for (size_t i = view.cur_line; i < fp->len; i++) {
+        fp->lines[i]->num -= 1;
+    }
+
+    // shorten lines array
+    Line **tmp = realloc(fp->lines,  fp->len * sizeof(Line *));
+    if (tmp != NULL) {
+        fp->lines = tmp;
+    } else {
+        fprintf(stderr, "Error reallocating space for new line.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return move_to_char(*fp, move_up(*fp, view), prev_line_len_before_combining);
+}
+
 /**
  * Deletes the character before the cursor position. The cursor moves left one
  * to stay with the character it was on.
@@ -53,7 +134,7 @@ View insert_char(char ch, FileProxy *fp, View view) {
  */
 View backspace(FileProxy *fp, View view) {
     if (view.cur_ch == 0) {
-        return view;
+        return combine_line_with_prev(fp, view);
     }
 
     Line *line = fp->lines[view.cur_line];
@@ -100,6 +181,7 @@ View insert_newline(FileProxy *fp, View view) {
         fp->lines[i]->num += 1;
     }
 
+    // move text
     Line *cur_line = fp->lines[view.cur_line];
     Line *new_line = fp->lines[view.cur_line+1];
     size_t text_to_eol_len = cur_line->len - view.cur_ch;
@@ -110,6 +192,7 @@ View insert_newline(FileProxy *fp, View view) {
     // remove the text from cursor to eol
     check_and_realloc_line(cur_line, -text_to_eol_len);
     cur_line->len -= text_to_eol_len;
+    cur_line->text[cur_line->len] = '\0';
 
     // move to new line
     return move_to_bol(*fp, move_down(*fp, view));

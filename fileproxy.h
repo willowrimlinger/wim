@@ -30,5 +30,7 @@ void print_fp(FileProxy fp, View view);
 
 void print_line(Line *line, View view);
 
+void write_fp(FileProxy fp, const char *filename);
+
 #endif
 

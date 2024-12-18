@@ -111,6 +111,29 @@ View move_right(FileProxy fp, View view) {
     return pan(new_view);
 }
 
+/**
+ * Move to a specific character number in the current line.
+ *
+ * @param fp the FileProxy to move in
+ * @param view the current view before moving
+ * @param ch the character number in the line
+ * @return the new view after moving to the desired character
+ */
+View move_to_char(FileProxy fp, View view, const size_t ch) {
+    Line *line = fp.lines[view.cur_line];
+    if (ch >= line->len) {
+        return view;
+    }
+    View new_view = {
+        view.top_line,
+        view.left_ch,
+        view.cur_line,
+        ch,
+        ch
+    };
+    return pan(new_view);
+}
+
 View move_to_eol(FileProxy fp, View view) {
     size_t eol = fp.lines[view.cur_line]->len;
     View new_view = {

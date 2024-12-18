@@ -27,7 +27,7 @@ void print_num(int y, int x, int num) { //FIXME remove
         printw(str);
 }
 
-static void loop(FileProxy fp) {
+static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, 0, 0, 0};
     while (1) {
         print_fp(fp, view);
@@ -60,6 +60,9 @@ static void loop(FileProxy fp) {
                 break;
             case KEY_BACKSPACE:
                 view = backspace(&fp, view);
+                break;
+            case KEY_NPAGE: // FIXME
+                write_fp(fp, filename);
                 break;
         }
         // text insertion
@@ -106,7 +109,7 @@ int main(int argc, char *argv[]) {
     noecho();
 
     // main program loop
-    loop(fp);
+    loop(fp, argv[1]);
 
     free_fp(fp);
     endwin();
