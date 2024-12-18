@@ -125,6 +125,57 @@ View combine_line_with_prev(FileProxy *fp, View view) {
 }
 
 /**
+ * Appends the text of the next line to the end of the current line.
+ * Moves the cursor to where the newly inserted text begins on the current line.
+ *
+ * @param fp the FileProxy to edit
+ * @param view the current View
+ * @return the new cursor position after combining
+ */
+View combine_line_with_next(FileProxy *fp, View view) {
+    if (view.cur_line == fp->len - 1) {
+        return view;
+    }
+
+    // move text
+    Line *cur_line = fp->lines[view.cur_line];
+    Line *next_line = fp->lines[view.cur_line+1];
+    size_t cur_line_len_before_combining = cur_line->len;
+    if (next_line->len > 0) {
+        // add the text from the next line to the current line
+        check_and_realloc_line(cur_line, next_line->len);
+        strcpy(cur_line->text + cur_line->len, next_line->text);
+        cur_line->len += next_line->len;
+    }
+
+    // move lines after next line up one
+    if (view.cur_line < fp->len - 2) {
+        Line **src = fp->lines + view.cur_line + 2;
+        Line **dest = fp->lines + view.cur_line + 1;
+        memmove(dest, src, (fp->len - (view.cur_line + 2)) * sizeof(Line *));
+    }
+
+    // update length
+    fp->len -= 1;
+
+    // update the line numbers of subsequent lines
+    for (size_t i = view.cur_line + 1; i < fp->len; i++) {
+        fp->lines[i]->num -= 1;
+    }
+
+    // shorten lines array
+    Line **tmp = realloc(fp->lines,  fp->len * sizeof(Line *));
+    if (tmp != NULL) {
+        fp->lines = tmp;
+    } else {
+        fprintf(stderr, "Error reallocating space for new line.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return move_to_char(*fp, view, cur_line_len_before_combining);
+}
+
+/**
  * Deletes the character before the cursor position. The cursor moves left one
  * to stay with the character it was on.
  *
@@ -143,7 +194,7 @@ View backspace(FileProxy *fp, View view) {
     // move every char from cursor onwards left 1
     char *src = line->text + view.cur_ch;
     char *dest = src - 1;
-    memmove(dest, src, (line->len - view.cur_ch + 1) * byte);
+    memmove(dest, src, (line->len - view.cur_ch + 1) * byte); // +1 for \0
     
     // update length
     line->len -= 1;
@@ -152,6 +203,33 @@ View backspace(FileProxy *fp, View view) {
     return move_left(*fp, view);
 }
 
+View delete(FileProxy *fp, View view) {
+    Line *line = fp->lines[view.cur_line];
+    if (view.cur_ch == line->len) {
+        return combine_line_with_next(fp, view);
+    }
+
+    check_and_realloc_line(line, - 1);
+
+    // move every char from char after cursor onwards left 1
+    char *src = line->text + view.cur_ch + 1;
+    char *dest = src - 1;
+    // +1 for converting 0-indexed cur_ch to 1-indexed len, +1 for \0
+    memmove(dest, src, (line->len - (view.cur_ch + 1) + 1) * byte); 
+    
+    // update length
+    line->len -= 1;
+
+    return view;
+}
+
+/**
+ * Inserts a new Line into the FileProxy after the current line.
+ *
+ * @param fp the FileProxy to edit
+ * @param view the current View
+ * @return the new view with the cursor at the beginning of the new line
+ */
 View insert_newline(FileProxy *fp, View view) {
     // make space for a new line
     Line **tmp = realloc(fp->lines,  (fp->len + 1) * sizeof(Line *));
