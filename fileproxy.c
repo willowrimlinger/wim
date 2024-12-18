@@ -25,7 +25,7 @@ static const size_t TEXT_BUF_INCR = 16;
  */
 Line *create_line(size_t line_num) {
     Line *line = malloc(sizeof(Line));
-    char *text = malloc((TEXT_BUF_INCR+ 1) * byte); // +1 for terminating null byte
+    char *text = malloc((TEXT_BUF_INCR + 1) * byte); // +1 for terminating null byte
     Line new_line = {text, line_num, 0, TEXT_BUF_INCR};
     *line = new_line;
     return line;
@@ -34,7 +34,7 @@ Line *create_line(size_t line_num) {
 /**
  * Adjusts the text buffer of a line. Checks if the given line is full and the 
  * buffer needs to be increased or if the line has space to reduce the buffer.
- * Also increases the length and capacity according to the additional text length.
+ * Adjusts the capacity of the line.
  *
  * @param line the line to check and potentially increase
  * @param additional_text_len the number of chars that are being added (or subtracted)
@@ -52,7 +52,7 @@ void check_and_realloc_line(Line *line, size_t additional_text_len) {
             fprintf(stderr, "Error reallocating space for line text.\n");
             exit(EXIT_FAILURE);
         }
-        line->len += additional_text_len;
+//        line->len += additional_text_len;
         line->cap = ideal_num_buffers * TEXT_BUF_INCR;
     }
 }
@@ -105,7 +105,11 @@ void log_fp(FileProxy fp) {
         log_to_file("line num: %lu", fp.lines[i]->num);
         log_to_file("len: %lu", fp.lines[i]->len);
         log_to_file("cap: %lu", fp.lines[i]->cap);
-        log_to_file("text: %s", fp.lines[i]->text);
+        if (fp.lines[i]->len == 0) {
+            log_to_file("text: <empty>");
+        } else {
+            log_to_file("text: %s", fp.lines[i]->text);
+        }
     }
 }
 
