@@ -44,8 +44,6 @@ View insert_char(char ch, FileProxy *fp, View view) {
 }
 
 View insert_newline(FileProxy *fp, View view) {
-    log_to_file("inserting newline");
-    log_to_file("moving lines");
     // make space for a new line
     Line **tmp = realloc(fp->lines,  (fp->len + 1) * sizeof(Line *));
     if (tmp != NULL) {
@@ -58,28 +56,22 @@ View insert_newline(FileProxy *fp, View view) {
     // if we aren't on the last line
     if (view.cur_line != fp->len - 1) {
         // move every line after the current down 1
-        log_to_file("we aren't on the last line");
         Line **src = fp->lines + view.cur_line + 1;
         Line **dest = fp->lines + view.cur_line + 2;
         memmove(dest, src, (fp->len - (view.cur_line + 1)) * sizeof(Line *));
     }
 
-    log_to_file("updating len");
     // update length
     fp->len += 1;
 
-    log_to_file("adding a new line");
     // insert new line
     fp->lines[view.cur_line+1] = create_line(view.cur_line + 1);
 
-    log_to_file("updating line numbers of subsequent lines");
     // update the line numbers of each subsequent line
     for (size_t i = view.cur_line + 2; i < fp->len; i++) {
-        log_to_file("\t updating line %lu", i);
         fp->lines[i]->num += 1;
     }
 
-    log_to_file("moving text");
     Line *cur_line = fp->lines[view.cur_line];
     Line *new_line = fp->lines[view.cur_line+1];
     size_t text_to_eol_len = cur_line->len - view.cur_ch;
@@ -93,7 +85,6 @@ View insert_newline(FileProxy *fp, View view) {
 
     log_fp(*fp);
 
-    log_to_file("moving cursor down");
     // move to new line
     return move_to_bol(*fp, move_down(*fp, view));
 }
