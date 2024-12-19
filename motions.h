@@ -14,21 +14,19 @@
 #include "types.h"
 #include "fileproxy.h"
 
-void move_cur(View view);
+View *move_up(FileProxy fp, View *view);
 
-View move_up(FileProxy fp, View view);
+View *move_down(FileProxy fp, View *view);
 
-View move_down(FileProxy fp, View view);
+View *move_left(FileProxy fp, View *view);
 
-View move_left(FileProxy fp, View view);
+View *move_right(FileProxy fp, View *view);
 
-View move_right(FileProxy fp, View view);
+View *move_to_char(FileProxy fp, View *view, const size_t ch);
 
-View move_to_char(FileProxy fp, View view, const size_t  ch);
+View *move_to_eol(FileProxy fp, View *view);
 
-View move_to_eol(FileProxy fp, View view);
-
-View move_to_bol(FileProxy fp, View view);
+View *move_to_bol(FileProxy fp, View *view);
 
 #endif
 

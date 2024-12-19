@@ -129,22 +129,12 @@ void free_fp(FileProxy fp) {
     fp.lines = NULL;
 }
 
-/** 
- * Prints the contents of a FileProxy to the ncurses stdscr
+/**
+ * Writes the contents of a FileProxy to a file, overwriting all previous contents
  *
- * @param fp the FileProxy to print
+ * @param fp the FileProxy to write to disk
+ * @param filename the name of the file to write to
  */
-void print_fp(FileProxy fp, View view) {
-    erase();
-    for (size_t i = view.top_line; i < fp.len; i++) {
-        Line line = *fp.lines[i];
-        for (size_t j = view.left_ch; j < line.len; j++) {
-            mvaddch(i - view.top_line, j - view.left_ch, line.text[j]);
-        }
-    }
-}
-
-// FIXME acts weird sometimes. duplicates lines or removes them
 void write_fp(FileProxy fp, const char *filename) {
     log_fp(fp);
     FILE *file = fopen(filename, "w");
