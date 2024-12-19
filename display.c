@@ -35,10 +35,20 @@ void display_fp(FileProxy fp, View view) {
     }
 }
 
+void display_status_bar(const char mode) {
+    char *mode_str = "";
+    if (mode == 'i') {
+        mode_str = "-- INSERT -- ";
+    }
+    move(LINES - 1, 0);
+    printw(mode_str);
+}
+
 void display(const char mode, FileProxy fp, View view) {
     erase();
 
     display_fp(fp, view);
+    display_status_bar(mode);
     move_cur(view);
 
     refresh();
