@@ -22,7 +22,7 @@ static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTY
 
 static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
-    char mode = 'i'; // i - insert, n - normal
+    char mode = 'n'; // i - insert, n - normal
     while (1) {
         display(mode, fp, view);
         int key = getch();
@@ -70,15 +70,19 @@ static void loop(FileProxy fp, const char *filename) {
         } else { // normal mode
             switch (key) {
                 case KEY_UP:
+                case 'k':
                     move_up(fp, &view);
                     break;
                 case KEY_DOWN:
+                case 'j':
                     move_down(fp, &view);
                     break;
                 case KEY_LEFT:
+                case 'h':
                     move_left(fp, &view);
                     break;
                 case KEY_RIGHT:
+                case 'l':
                     move_right(fp, &view);
                     break;
                 case KEY_END:
@@ -104,6 +108,9 @@ static void loop(FileProxy fp, const char *filename) {
                 case 'i':
                     mode = 'i';
                     break;
+                case 'A':
+                    move_to_eol(fp, &view);
+                    mode = 'i';
             }
         }
     }
