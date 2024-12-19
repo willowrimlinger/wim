@@ -26,6 +26,10 @@ typedef struct View_s {
     size_t top_line;
     // the character/column that should be at the left of the screen
     size_t left_ch;
+    // the number of lines available to display the FileProxy in
+    size_t vlimit;
+    // the number of cols available to display the FileProxy in
+    size_t hlimit;
     // the line that the cursor is on
     size_t cur_line;
     // the character that the cursor is on

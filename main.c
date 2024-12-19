@@ -15,48 +15,47 @@
 #include "fileproxy.h"
 #include "motions.h"
 #include "insert.h"
+#include "display.h"
 
 static const int NORMAL_KEYS_LEN = 96;
 static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>? ";
 
 static void loop(FileProxy fp, const char *filename) {
-    View view = {0, 0, 0, 0, 0};
+    View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
     char mode = 'i'; // i - insert, n - normal
     while (1) {
-        print_fp(fp, view);
-        move_cur(view);
-        refresh();
+        display(mode, fp, view);
         int key = getch();
         if (mode == 'i') { // insert mode
             switch (key) {
                 case KEY_UP:
-                    view = move_up(fp, view);
+                    move_up(fp, &view);
                     break;
                 case KEY_DOWN:
-                    view = move_down(fp, view);
+                    move_down(fp, &view);
                     break;
                 case KEY_LEFT:
-                    view = move_left(fp, view);
+                    move_left(fp, &view);
                     break;
                 case KEY_RIGHT:
-                    view = move_right(fp, view);
+                    move_right(fp, &view);
                     break;
                 case KEY_END:
-                    view = move_to_eol(fp, view);
+                    move_to_eol(fp, &view);
                     break;
                 case KEY_HOME:
-                    view = move_to_bol(fp, view);
+                    move_to_bol(fp, &view);
                     break;
                 case KEY_ENTER:
                 case '\n':
                 case '\r':
-                    view = insert_newline(&fp, view);
+                    insert_newline(&fp, &view);
                     break;
                 case KEY_BACKSPACE:
-                    view = backspace(&fp, view);
+                    backspace(&fp, &view);
                     break;
                 case KEY_DC:
-                    view = delete(&fp, view);
+                    delete(&fp, &view);
                     break;
                 case 27:
                     mode = 'n';
@@ -65,30 +64,30 @@ static void loop(FileProxy fp, const char *filename) {
             // text insertion
             for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
                 if (key == NORMAL_KEYS[i]) {
-                    view = insert_char(key, &fp, view);
+                    insert_char(key, &fp, &view);
                 }
             }
         } else { // normal mode
             switch (key) {
                 case KEY_UP:
-                    view = move_up(fp, view);
+                    move_up(fp, &view);
                     break;
                 case KEY_DOWN:
-                    view = move_down(fp, view);
+                    move_down(fp, &view);
                     break;
                 case KEY_LEFT:
-                    view = move_left(fp, view);
+                    move_left(fp, &view);
                     break;
                 case KEY_RIGHT:
-                    view = move_right(fp, view);
+                    move_right(fp, &view);
                     break;
                 case KEY_END:
                 case '$':
-                    view = move_to_eol(fp, view);
+                    move_to_eol(fp, &view);
                     break;
                 case KEY_HOME:
                 case '0':
-                    view = move_to_bol(fp, view);
+                    move_to_bol(fp, &view);
                     break;
                 case KEY_ENTER:
                 case '\n':
@@ -100,7 +99,7 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_DC:
                 case 'x':
-                    view = delete(&fp, view);
+                    delete(&fp, &view);
                     break;
                 case 'i':
                     mode = 'i';
