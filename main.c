@@ -109,8 +109,8 @@ static void loop(FileProxy fp, const char *filename) {
                     mode = 'i';
                     break;
                 case 'A':
-                    move_to_eol(fp, &view, mode);
                     mode = 'i';
+                    move_to_eol(fp, &view, mode);
             }
         }
     }
