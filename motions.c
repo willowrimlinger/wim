@@ -11,7 +11,7 @@
 #include "types.h"
 #include "motions.h"
 
-View *pan(View *view) {
+void pan(View *view) {
     if (view->cur_line < view->top_line) {
         view->top_line = view->cur_line;
     } else if (view->cur_line > view->top_line + view->vlimit - 1) {
@@ -23,13 +23,11 @@ View *pan(View *view) {
     } else if (view->cur_ch > view->left_ch + view->hlimit - 1) {
         view->left_ch = view->cur_ch - (view->hlimit - 1);
     }
-    return view;
 }
 
-View *move_up(FileProxy fp, View *view, const char mode) {
+void move_up(FileProxy fp, View *view, const char mode) {
     if (view->cur_line == 0) {
-        // can't move up, first line
-        return view;
+        return;
     }
 
     view->cur_line -= 1;
@@ -46,13 +44,14 @@ View *move_up(FileProxy fp, View *view, const char mode) {
     if (above_len == 0) {
         view->cur_ch = 0;
     }
-    return pan(view);
+
+    pan(view);
 }
 
-View *move_down(FileProxy fp, View *view, const char mode) {
+void move_down(FileProxy fp, View *view, const char mode) {
     if (view->cur_line == fp.len - 1) {
         // can't move down, last line
-        return view;
+        return;
     }
 
     view->cur_line += 1;
@@ -69,38 +68,39 @@ View *move_down(FileProxy fp, View *view, const char mode) {
     if (below_len == 0) {
         view->cur_ch = 0;
     }
-    return pan(view);
+
+    pan(view);
 }
 
-View *move_left(FileProxy fp, View *view) {
+void move_left(FileProxy fp, View *view) {
     if (view->cur_ch == 0) {
         // can't move left, beginning of line
-        return view;
+        return;
     }
 
     view->cur_ch -= 1;
     view->cur_desired_ch = view->cur_ch;
 
-    return pan(view);
+    pan(view);
 }
 
-View *move_right(FileProxy fp, View *view, const char mode) {
+void move_right(FileProxy fp, View *view, const char mode) {
     if (mode == 'i') {
         if (view->cur_ch == fp.lines[view->cur_line]->len) {
             // can't move right, end of line
-            return view;
+            return;
         }
     } else {
         if (view->cur_ch == fp.lines[view->cur_line]->len - 1) {
             // can't move right, end of line
-            return view;
+            return;
         }
     }
 
     view->cur_ch += 1;
     view->cur_desired_ch = view->cur_ch;
 
-    return pan(view);
+    pan(view);
 }
 
 /**
@@ -111,25 +111,25 @@ View *move_right(FileProxy fp, View *view, const char mode) {
  * @param ch the character number in the line
  * @return the new view after moving to the desired character
  */
-View *move_to_char(FileProxy fp, View *view, const char mode, const size_t ch) {
+void move_to_char(FileProxy fp, View *view, const char mode, const size_t ch) {
     Line *line = fp.lines[view->cur_line];
     if (mode == 'i') {
         if (ch >= line->len) {
-            return view;
+            return;
         }
     } else {
         if (ch >= line->len - 1) {
-            return view;
+            return;
         }
     }
 
     view->cur_ch = ch;
     view->cur_desired_ch = ch;
 
-    return pan(view);
+    pan(view);
 }
 
-View *move_to_eol(FileProxy fp, View *view, const char mode) {
+void move_to_eol(FileProxy fp, View *view, const char mode) {
     size_t eol;
     if (mode == 'i') {
         eol = fp.lines[view->cur_line]->len;
@@ -140,13 +140,13 @@ View *move_to_eol(FileProxy fp, View *view, const char mode) {
     view->cur_ch = eol;
     view->cur_desired_ch = eol;
 
-    return pan(view);
+    pan(view);
 }
 
-View *move_to_bol(FileProxy fp, View *view) {
+void move_to_bol(FileProxy fp, View *view) {
     view->cur_ch = 0;
     view->cur_desired_ch = 0;
 
-    return pan(view);
+    pan(view);
 }
 
