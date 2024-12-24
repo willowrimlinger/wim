@@ -12,11 +12,11 @@
 #ifndef INSERT_H
 #define INSERT_H
 
-View *insert_char(char ch, FileProxy *fp, View *view);
+View *insert_char(char ch, FileProxy *fp, View *view, const char mode);
 
-View *backspace(FileProxy *fp, View *view);
+View *backspace(FileProxy *fp, View *view, const char mode);
 
-View *delete(FileProxy *fp, View *view);
+View *delete(FileProxy *fp, View *view, const char mode);
 
 View *insert_newline(FileProxy *fp, View *view);
 
