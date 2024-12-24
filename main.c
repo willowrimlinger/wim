@@ -29,19 +29,19 @@ static void loop(FileProxy fp, const char *filename) {
         if (mode == 'i') { // insert mode
             switch (key) {
                 case KEY_UP:
-                    move_up(fp, &view);
+                    move_up(fp, &view, mode);
                     break;
                 case KEY_DOWN:
-                    move_down(fp, &view);
+                    move_down(fp, &view, mode);
                     break;
                 case KEY_LEFT:
                     move_left(fp, &view);
                     break;
                 case KEY_RIGHT:
-                    move_right(fp, &view);
+                    move_right(fp, &view, mode);
                     break;
                 case KEY_END:
-                    move_to_eol(fp, &view);
+                    move_to_eol(fp, &view, mode);
                     break;
                 case KEY_HOME:
                     move_to_bol(fp, &view);
@@ -52,10 +52,10 @@ static void loop(FileProxy fp, const char *filename) {
                     insert_newline(&fp, &view);
                     break;
                 case KEY_BACKSPACE:
-                    backspace(&fp, &view);
+                    backspace(&fp, &view, mode);
                     break;
                 case KEY_DC:
-                    delete(&fp, &view);
+                    delete(&fp, &view, mode);
                     break;
                 case 27:
                     mode = 'n';
@@ -64,18 +64,18 @@ static void loop(FileProxy fp, const char *filename) {
             // text insertion
             for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
                 if (key == NORMAL_KEYS[i]) {
-                    insert_char(key, &fp, &view);
+                    insert_char(key, &fp, &view, mode);
                 }
             }
         } else { // normal mode
             switch (key) {
                 case KEY_UP:
                 case 'k':
-                    move_up(fp, &view);
+                    move_up(fp, &view, mode);
                     break;
                 case KEY_DOWN:
                 case 'j':
-                    move_down(fp, &view);
+                    move_down(fp, &view, mode);
                     break;
                 case KEY_LEFT:
                 case 'h':
@@ -83,11 +83,11 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_RIGHT:
                 case 'l':
-                    move_right(fp, &view);
+                    move_right(fp, &view, mode);
                     break;
                 case KEY_END:
                 case '$':
-                    move_to_eol(fp, &view);
+                    move_to_eol(fp, &view, mode);
                     break;
                 case KEY_HOME:
                 case '0':
@@ -103,13 +103,13 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_DC:
                 case 'x':
-                    delete(&fp, &view);
+                    delete(&fp, &view, mode);
                     break;
                 case 'i':
                     mode = 'i';
                     break;
                 case 'A':
-                    move_to_eol(fp, &view);
+                    move_to_eol(fp, &view, mode);
                     mode = 'i';
             }
         }
