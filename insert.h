@@ -12,11 +12,11 @@
 #ifndef INSERT_H
 #define INSERT_H
 
-void insert_char(char ch, FileProxy *fp, View *view, const char mode);
+void insert_char(char ch, FileProxy *fp, View *view, MimState ms);
 
-void backspace(FileProxy *fp, View *view, const char mode);
+void backspace(FileProxy *fp, View *view, MimState ms);
 
-void delete(FileProxy *fp, View *view, const char mode);
+void delete(FileProxy *fp, View *view, MimState ms);
 
 void insert_newline(FileProxy *fp, View *view);
 

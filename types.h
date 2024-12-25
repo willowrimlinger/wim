@@ -8,6 +8,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <stddef.h>
+
+/** Represents an individual line in a FileProxy */
 typedef struct Line_s {
     char *text;
     size_t num;
@@ -15,12 +18,13 @@ typedef struct Line_s {
     size_t cap;
 } Line;
 
+/** Represents a file and has some metadata information about line and buffer lengths */
 typedef struct FileProxy_s {
     Line **lines;
     size_t len;
 } FileProxy;
 
-/** Represents a cursor position in a file as well as where in the file you are viewing */
+/** Represents a cursor position in a FileProxy as well as where in the file you are viewing */
 typedef struct View_s {
     // the line that should be at the top of the screen
     size_t top_line;
@@ -37,6 +41,20 @@ typedef struct View_s {
     // the character that the cursor should be moved to if the line is long enough
     size_t cur_desired_ch;
 } View;
+
+/** The current mode of the mim program */
+typedef enum Mode_e {
+    NORMAL,
+    INSERT
+} Mode;
+
+/**
+ * Represents the internal state of the mim program. This stuff is "global" 
+ * across buffers and there should only be one per program.
+ */
+typedef struct MimState_s {
+    Mode mode;
+} MimState;
 
 #endif
 

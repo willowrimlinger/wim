@@ -25,7 +25,7 @@ void pan(View *view) {
     }
 }
 
-void move_up(FileProxy fp, View *view, const char mode) {
+void move_up(FileProxy fp, View *view, MimState ms) {
     if (view->cur_line == 0) {
         return;
     }
@@ -35,7 +35,7 @@ void move_up(FileProxy fp, View *view, const char mode) {
 
     size_t above_len = fp.lines[view->cur_line]->len;
     if (above_len <= view->cur_desired_ch) {
-        if (mode == 'i') {
+        if (ms.mode == INSERT) {
             view->cur_ch = above_len;
         } else {
             view->cur_ch = above_len - 1;
@@ -48,7 +48,7 @@ void move_up(FileProxy fp, View *view, const char mode) {
     pan(view);
 }
 
-void move_down(FileProxy fp, View *view, const char mode) {
+void move_down(FileProxy fp, View *view, MimState ms) {
     if (view->cur_line == fp.len - 1) {
         // can't move down, last line
         return;
@@ -59,7 +59,7 @@ void move_down(FileProxy fp, View *view, const char mode) {
 
     size_t below_len = fp.lines[view->cur_line]->len;
     if (below_len <= view->cur_desired_ch) {
-        if (mode == 'i') {
+        if (ms.mode == INSERT) {
             view->cur_ch = below_len;
         } else {
             view->cur_ch = below_len - 1;
@@ -84,8 +84,8 @@ void move_left(FileProxy fp, View *view) {
     pan(view);
 }
 
-void move_right(FileProxy fp, View *view, const char mode) {
-    if (mode == 'i') {
+void move_right(FileProxy fp, View *view, MimState ms) {
+    if (ms.mode == INSERT) {
         if (view->cur_ch == fp.lines[view->cur_line]->len) {
             // can't move right, end of line
             return;
@@ -111,9 +111,9 @@ void move_right(FileProxy fp, View *view, const char mode) {
  * @param ch the character number in the line
  * @return the new view after moving to the desired character
  */
-void move_to_char(FileProxy fp, View *view, const char mode, const size_t ch) {
+void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
     Line *line = fp.lines[view->cur_line];
-    if (mode == 'i') {
+    if (ms.mode == INSERT) {
         if (ch >= line->len) {
             return;
         }
@@ -129,9 +129,9 @@ void move_to_char(FileProxy fp, View *view, const char mode, const size_t ch) {
     pan(view);
 }
 
-void move_to_eol(FileProxy fp, View *view, const char mode) {
+void move_to_eol(FileProxy fp, View *view, MimState ms) {
     size_t eol;
-    if (mode == 'i') {
+    if (ms.mode == INSERT) {
         eol = fp.lines[view->cur_line]->len;
     } else {
         eol = fp.lines[view->cur_line]->len - 1;

@@ -25,7 +25,7 @@ static const size_t byte = sizeof(unsigned char);
  * @param view the current View
  * @return the new cursor position after inserting
  */
-void insert_char(char ch, FileProxy *fp, View *view, const char mode) {
+void insert_char(char ch, FileProxy *fp, View *view, MimState ms) {
     Line *line = fp->lines[view->cur_line];
     check_and_realloc_line(line, 1);
     
@@ -41,11 +41,11 @@ void insert_char(char ch, FileProxy *fp, View *view, const char mode) {
     line->text[view->cur_ch] = ch;
     
     // move cursor
-    move_right(*fp, view, mode);
+    move_right(*fp, view, ms);
 }
 
 // FIXME may or may not work
-void delete_line(FileProxy *fp, View *view, const char mode) {
+void delete_line(FileProxy *fp, View *view, MimState ms) {
     if (view->cur_line == 0) {
         return;
     }
@@ -72,7 +72,7 @@ void delete_line(FileProxy *fp, View *view, const char mode) {
         exit(EXIT_FAILURE);
     }
 
-    move_up(*fp, view, mode);
+    move_up(*fp, view, ms);
 }
 
 /**
@@ -83,7 +83,7 @@ void delete_line(FileProxy *fp, View *view, const char mode) {
  * @param view the current View
  * @return the new cursor position after combining
  */
-void combine_line_with_prev(FileProxy *fp, View *view, const char mode) {
+void combine_line_with_prev(FileProxy *fp, View *view, MimState ms) {
     if (view->cur_line == 0) {
         return;
     }
@@ -121,8 +121,8 @@ void combine_line_with_prev(FileProxy *fp, View *view, const char mode) {
         exit(EXIT_FAILURE);
     }
 
-    move_up(*fp, view, mode);
-    move_to_char(*fp, view, mode, prev_line_len_before_combining);
+    move_up(*fp, view, ms);
+    move_to_char(*fp, view, ms, prev_line_len_before_combining);
 }
 
 /**
@@ -133,7 +133,7 @@ void combine_line_with_prev(FileProxy *fp, View *view, const char mode) {
  * @param view the current View
  * @return the new cursor position after combining
  */
-void combine_line_with_next(FileProxy *fp, View *view, const char mode) {
+void combine_line_with_next(FileProxy *fp, View *view, MimState ms) {
     if (view->cur_line == fp->len - 1) {
         return;
     }
@@ -173,7 +173,7 @@ void combine_line_with_next(FileProxy *fp, View *view, const char mode) {
         exit(EXIT_FAILURE);
     }
 
-    move_to_char(*fp, view, mode, cur_line_len_before_combining);
+    move_to_char(*fp, view, ms, cur_line_len_before_combining);
 }
 
 /**
@@ -184,9 +184,9 @@ void combine_line_with_next(FileProxy *fp, View *view, const char mode) {
  * @param view the current View
  * @return the new view with the cursor moved one left
  */
-void backspace(FileProxy *fp, View *view, const char mode) {
+void backspace(FileProxy *fp, View *view, MimState ms) {
     if (view->cur_ch == 0) {
-        combine_line_with_prev(fp, view, mode);
+        combine_line_with_prev(fp, view, ms);
         return;
     }
 
@@ -205,10 +205,10 @@ void backspace(FileProxy *fp, View *view, const char mode) {
     move_left(*fp, view);
 }
 
-void delete(FileProxy *fp, View *view, const char mode) {
+void delete(FileProxy *fp, View *view, MimState ms) {
     Line *line = fp->lines[view->cur_line];
     if (view->cur_ch == line->len) {
-        combine_line_with_next(fp, view, mode);
+        combine_line_with_next(fp, view, ms);
         return;
     }
 
@@ -231,7 +231,7 @@ void delete(FileProxy *fp, View *view, const char mode) {
  * @param view the current View
  * @return the new view with the cursor at the beginning of the new line
  */
-void insert_newline(FileProxy *fp, View *view, const char mode) {
+void insert_newline(FileProxy *fp, View *view, MimState ms) {
     // make space for a new line
     Line **tmp = realloc(fp->lines,  (fp->len + 1) * sizeof(Line *));
     if (tmp != NULL) {
@@ -274,7 +274,7 @@ void insert_newline(FileProxy *fp, View *view, const char mode) {
     cur_line->text[cur_line->len] = '\0';
 
     // move to new line
-    move_down(*fp, view, mode);
+    move_down(*fp, view, ms);
     move_to_bol(*fp, view);
 }
 
