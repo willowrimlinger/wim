@@ -12,6 +12,7 @@
 
 #include "log.h"
 #include "types.h"
+#include "mode.h"
 #include "fileproxy.h"
 #include "motions.h"
 #include "insert.h"
@@ -22,26 +23,27 @@ static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTY
 
 static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
-    char mode = 'n'; // i - insert, n - normal
+    MimState ms = {NORMAL};
+    switch_mode(fp, &view, &ms, NORMAL);
     while (1) {
-        display(mode, fp, view);
+        display(ms, fp, view);
         int key = getch();
-        if (mode == 'i') { // insert mode
+        if (ms.mode == INSERT) { // insert mode
             switch (key) {
                 case KEY_UP:
-                    move_up(fp, &view, mode);
+                    move_up(fp, &view, ms);
                     break;
                 case KEY_DOWN:
-                    move_down(fp, &view, mode);
+                    move_down(fp, &view, ms);
                     break;
                 case KEY_LEFT:
                     move_left(fp, &view);
                     break;
                 case KEY_RIGHT:
-                    move_right(fp, &view, mode);
+                    move_right(fp, &view, ms);
                     break;
                 case KEY_END:
-                    move_to_eol(fp, &view, mode);
+                    move_to_eol(fp, &view, ms);
                     break;
                 case KEY_HOME:
                     move_to_bol(fp, &view);
@@ -52,30 +54,30 @@ static void loop(FileProxy fp, const char *filename) {
                     insert_newline(&fp, &view);
                     break;
                 case KEY_BACKSPACE:
-                    backspace(&fp, &view, mode);
+                    backspace(&fp, &view, ms);
                     break;
                 case KEY_DC:
-                    delete(&fp, &view, mode);
+                    delete(&fp, &view, ms);
                     break;
                 case 27:
-                    mode = 'n';
+                    switch_mode(fp, &view, &ms, NORMAL);
                     break;
             }
             // text insertion
             for (int i = 0; i < NORMAL_KEYS_LEN; i++) {
                 if (key == NORMAL_KEYS[i]) {
-                    insert_char(key, &fp, &view, mode);
+                    insert_char(key, &fp, &view, ms);
                 }
             }
         } else { // normal mode
             switch (key) {
                 case KEY_UP:
                 case 'k':
-                    move_up(fp, &view, mode);
+                    move_up(fp, &view, ms);
                     break;
                 case KEY_DOWN:
                 case 'j':
-                    move_down(fp, &view, mode);
+                    move_down(fp, &view, ms);
                     break;
                 case KEY_LEFT:
                 case 'h':
@@ -83,11 +85,11 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_RIGHT:
                 case 'l':
-                    move_right(fp, &view, mode);
+                    move_right(fp, &view, ms);
                     break;
                 case KEY_END:
                 case '$':
-                    move_to_eol(fp, &view, mode);
+                    move_to_eol(fp, &view, ms);
                     break;
                 case KEY_HOME:
                 case '0':
@@ -103,14 +105,18 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_DC:
                 case 'x':
-                    delete(&fp, &view, mode);
+                    delete(&fp, &view, ms);
                     break;
                 case 'i':
-                    mode = 'i';
+                    switch_mode(fp, &view, &ms, INSERT);
+                    break;
+                case 'a':
+                    switch_mode(fp, &view, &ms, INSERT);
+                    move_right(fp, &view, ms);
                     break;
                 case 'A':
-                    mode = 'i';
-                    move_to_eol(fp, &view, mode);
+                    switch_mode(fp, &view, &ms, INSERT);
+                    move_to_eol(fp, &view, ms);
             }
         }
     }

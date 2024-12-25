@@ -5,5 +5,5 @@
  * Functions to display the program onto the ncurses window
  */
 
-void display(const char mode, FileProxy fp, View view);
+void display(MimState ms, FileProxy fp, View view);
 
