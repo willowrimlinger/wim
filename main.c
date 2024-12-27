@@ -115,7 +115,8 @@ static void loop(FileProxy fp, const char *filename) {
                 case KEY_ENTER:
                 case '\n':
                 case '\r':
-                    // TODO move down, move to first non whitespace char
+                    move_down(fp, &view, ms);
+                    move_to_bol_non_ws(fp, &view, ms);
                     break;
                 case KEY_BACKSPACE:
                     // TODO move left, or move up a line if on first char
