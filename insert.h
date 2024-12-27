@@ -16,8 +16,8 @@ void insert_char(char ch, FileProxy *fp, View *view, MimState ms);
 
 void backspace(FileProxy *fp, View *view, MimState ms);
 
-void delete(FileProxy *fp, View *view, MimState ms);
+void delete_char(FileProxy *fp, View *view, MimState ms);
 
-void insert_newline(FileProxy *fp, View *view);
+void insert_newline(FileProxy *fp, View *view, MimState ms);
 
 #endif

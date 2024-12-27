@@ -28,7 +28,7 @@ void move_to_eol(FileProxy fp, View *view, MimState ms);
 
 void move_to_bol(FileProxy fp, View *view);
 
-void move_to_bol_non_whitespace(FileProxy fp, View *view, MimState ms);
+void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms);
 
 void move_to_bof(FileProxy fp, View *view);
 

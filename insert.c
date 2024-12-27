@@ -13,6 +13,7 @@
 #include "fileproxy.h"
 #include "motions.h"
 #include "log.h"
+#include "text_utils.h"
 
 static const size_t byte = sizeof(unsigned char);
 
@@ -205,7 +206,7 @@ void backspace(FileProxy *fp, View *view, MimState ms) {
     move_left(*fp, view);
 }
 
-void delete(FileProxy *fp, View *view, MimState ms) {
+void delete_char(FileProxy *fp, View *view, MimState ms) {
     Line *line = fp->lines[view->cur_line];
     if (view->cur_ch == line->len) {
         combine_line_with_next(fp, view, ms);
@@ -264,10 +265,15 @@ void insert_newline(FileProxy *fp, View *view, MimState ms) {
     Line *cur_line = fp->lines[view->cur_line];
     Line *new_line = fp->lines[view->cur_line+1];
     size_t text_to_eol_len = cur_line->len - view->cur_ch;
-    // add the text from cursor to eol to the new line
-    check_and_realloc_line(new_line, text_to_eol_len);
-    strcpy(new_line->text, cur_line->text + view->cur_ch);
-    new_line->len += text_to_eol_len;
+
+    // add the text from cursor to eol to the new line including indent
+    size_t indent_len = get_len_ws_beginning(*cur_line);
+    log_to_file("indent len: %lu", indent_len);
+    check_and_realloc_line(new_line, text_to_eol_len + indent_len);
+    strncpy(new_line->text, cur_line->text, indent_len); // add indent
+    strcpy(new_line->text + indent_len, cur_line->text + view->cur_ch); // add rest of text
+    new_line->len += text_to_eol_len + indent_len;
+
     // remove the text from cursor to eol
     check_and_realloc_line(cur_line, -text_to_eol_len);
     cur_line->len -= text_to_eol_len;
@@ -275,6 +281,6 @@ void insert_newline(FileProxy *fp, View *view, MimState ms) {
 
     // move to new line
     move_down(*fp, view, ms);
-    move_to_bol(*fp, view);
+    move_to_bol_non_ws(*fp, view, ms);
 }
 
