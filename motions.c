@@ -153,6 +153,20 @@ void move_to_bol(FileProxy fp, View *view) {
     pan(view);
 }
 
+void move_to_bof(FileProxy fp, View *view) {
+    view->cur_line = 0;
+
+    size_t beg_len = fp.lines[view->cur_line]->len;
+    if (beg_len <= view->cur_desired_ch) {
+        view->cur_ch = beg_len - 1;
+    }
+    if (beg_len == 0) {
+        view->cur_ch = 0;
+    }
+
+    pan(view);
+}
+
 void move_to_eof(FileProxy fp, View *view) {
     view->cur_line = fp.lines[fp.len - 1]->num;
 

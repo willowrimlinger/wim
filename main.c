@@ -97,6 +97,18 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case 'G':
                     move_to_eof(fp, &view);
+                    break;
+                case 'g':
+                    {
+                        int key2 = getch();
+                        switch (key2) {
+                            case 'g':
+                                move_to_bof(fp, &view);
+                                break;
+                            break;
+                        }
+                    }
+                    break;
                 case KEY_ENTER:
                 case '\n':
                 case '\r':
