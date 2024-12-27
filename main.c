@@ -95,6 +95,9 @@ static void loop(FileProxy fp, const char *filename) {
                 case '0':
                     move_to_bol(fp, &view);
                     break;
+                case '^':
+                    move_to_bol_non_whitespace(fp, &view, ms);
+                    break;
                 case 'G':
                     move_to_eof(fp, &view);
                     break;
