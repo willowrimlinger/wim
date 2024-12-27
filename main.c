@@ -51,13 +51,13 @@ static void loop(FileProxy fp, const char *filename) {
                 case KEY_ENTER:
                 case '\n':
                 case '\r':
-                    insert_newline(&fp, &view);
+                    insert_newline(&fp, &view, ms);
                     break;
                 case KEY_BACKSPACE:
                     backspace(&fp, &view, ms);
                     break;
                 case KEY_DC:
-                    delete(&fp, &view, ms);
+                    delete_char(&fp, &view, ms);
                     break;
                 case 27:
                     switch_mode(fp, &view, &ms, NORMAL);
@@ -96,7 +96,7 @@ static void loop(FileProxy fp, const char *filename) {
                     move_to_bol(fp, &view);
                     break;
                 case '^':
-                    move_to_bol_non_whitespace(fp, &view, ms);
+                    move_to_bol_non_ws(fp, &view, ms);
                     break;
                 case 'G':
                     move_to_eof(fp, &view);
@@ -122,7 +122,7 @@ static void loop(FileProxy fp, const char *filename) {
                     break;
                 case KEY_DC:
                 case 'x':
-                    delete(&fp, &view, ms);
+                    delete_char(&fp, &view, ms);
                     break;
                 case 'i':
                     switch_mode(fp, &view, &ms, INSERT);

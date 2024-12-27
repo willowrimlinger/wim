@@ -7,12 +7,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <ncurses.h>
 
 #include "log.h"
 #include "types.h"
 #include "motions.h"
+#include "text_utils.h"
 
 void pan(View *view) {
     if (view->cur_line < view->top_line) {
@@ -154,14 +154,15 @@ void move_to_bol(FileProxy fp, View *view) {
     pan(view);
 }
 
-void move_to_bol_non_whitespace(FileProxy fp, View *view, MimState ms) {
+void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
     Line *line = fp.lines[view->cur_line];
 
-    size_t ch_idx = 0;
-    for (size_t i = 0; i < line->len; i++) {
-        ch_idx = i;
-        if (!isspace(line->text[i])) {
-            break;
+    size_t ch_idx = get_len_ws_beginning(*line);
+    if (ms.mode == INSERT) {
+        if (line->len > 0) {
+            if (ch_idx == line->len - 1) {
+                ch_idx++;
+            }
         }
     }
 
