@@ -5,9 +5,11 @@
  * Functions to move the cursor across the file
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <ncurses.h>
 
+#include "log.h"
 #include "types.h"
 #include "motions.h"
 
@@ -86,12 +88,13 @@ void move_left(FileProxy fp, View *view) {
 
 void move_right(FileProxy fp, View *view, MimState ms) {
     if (ms.mode == INSERT) {
-        if (view->cur_ch == fp.lines[view->cur_line]->len) {
+        if (view->cur_ch >= fp.lines[view->cur_line]->len) {
             // can't move right, end of line
             return;
         }
     } else {
-        if (view->cur_ch == fp.lines[view->cur_line]->len - 1) {
+        if (fp.lines[view->cur_line]->len == 0
+                || view->cur_ch >= (fp.lines[view->cur_line]->len) - 1) {
             // can't move right, end of line
             return;
         }
@@ -146,6 +149,20 @@ void move_to_eol(FileProxy fp, View *view, MimState ms) {
 void move_to_bol(FileProxy fp, View *view) {
     view->cur_ch = 0;
     view->cur_desired_ch = 0;
+
+    pan(view);
+}
+
+void move_to_eof(FileProxy fp, View *view) {
+    view->cur_line = fp.lines[fp.len - 1]->num;
+
+    size_t end_len = fp.lines[view->cur_line]->len;
+    if (end_len <= view->cur_desired_ch) {
+        view->cur_ch = end_len - 1;
+    }
+    if (end_len == 0) {
+        view->cur_ch = 0;
+    }
 
     pan(view);
 }

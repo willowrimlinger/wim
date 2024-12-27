@@ -28,5 +28,7 @@ void move_to_eol(FileProxy fp, View *view, MimState ms);
 
 void move_to_bol(FileProxy fp, View *view);
 
+void move_to_eof(FileProxy fp, View *view);
+
 #endif
 
