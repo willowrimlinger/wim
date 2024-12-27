@@ -134,6 +134,12 @@ static void loop(FileProxy fp, const char *filename) {
                 case 'A':
                     switch_mode(fp, &view, &ms, INSERT);
                     move_to_eol(fp, &view, ms);
+                    break;
+                case 'o':
+                    switch_mode(fp, &view, &ms, INSERT);
+                    move_to_eol(fp, &view, ms);
+                    insert_newline(&fp, &view, ms);
+                    break;
             }
         }
     }
