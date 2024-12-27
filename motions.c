@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <ncurses.h>
 
 #include "log.h"
@@ -149,6 +150,22 @@ void move_to_eol(FileProxy fp, View *view, MimState ms) {
 void move_to_bol(FileProxy fp, View *view) {
     view->cur_ch = 0;
     view->cur_desired_ch = 0;
+
+    pan(view);
+}
+
+void move_to_bol_non_whitespace(FileProxy fp, View *view, MimState ms) {
+    Line *line = fp.lines[view->cur_line];
+
+    size_t ch_idx = 0;
+    for (size_t i = 0; i < line->len; i++) {
+        ch_idx = i;
+        if (!isspace(line->text[i])) {
+            break;
+        }
+    }
+
+    move_to_char(fp, view, ms, ch_idx);
 
     pan(view);
 }
