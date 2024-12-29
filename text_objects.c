@@ -73,7 +73,6 @@ CurPos get_end_pos_cur_word(FileProxy fp, CurPos current_pos) {
 }
 
 CurPos get_beg_pos_n_word(FileProxy fp, CurPos current_pos) {
-    // FIXME ignores empty lines and doesn't like the last char of the line
     bool (*is_different)(const char);
     if (is_word(fp.lines[current_pos.line]->text[current_pos.ch])) {
         is_different = &is_not_word_not_ws;
@@ -83,6 +82,7 @@ CurPos get_beg_pos_n_word(FileProxy fp, CurPos current_pos) {
         is_different = &is_not_ws;
     }
 
+    CurPos pos = current_pos;
     bool seen_ws = false;
     for (size_t l = current_pos.line; l < fp.len; l++) {
         size_t c;
@@ -102,6 +102,8 @@ CurPos get_beg_pos_n_word(FileProxy fp, CurPos current_pos) {
         }
         for ( ; c < fp.lines[l]->len; c++) {
             char ch = fp.lines[l]->text[c];
+            CurPos new_pos = {l, c};
+            pos = new_pos;
             if (isspace(ch)) {
                 seen_ws = true;
             }
@@ -110,12 +112,11 @@ CurPos get_beg_pos_n_word(FileProxy fp, CurPos current_pos) {
                 is_different = &is_not_ws;
             }
             if (is_different(ch)) {
-                CurPos new_pos = {l, c};
-                return new_pos;
+                return pos;
             }
         }
     }
-    return current_pos;
+    return pos;
 }
 
 CurPos get_beg_pos_cur_tobj(FileProxy fp, CurPos current_pos, TextObject tobj) {
