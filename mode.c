@@ -18,7 +18,7 @@ void switch_to_normal_mode(FileProxy fp, View *view, MimState *ms) {
     ms->mode = NORMAL;
 
     // handle cursor past the end of a line in insert mode
-    Line *cur_line = fp.lines[view->cur_line];
+    Line *cur_line = fp.lines[view->cur.line];
     if (cur_line->len > 0) {
         move_left(fp, view);
     }

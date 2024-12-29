@@ -13,96 +13,116 @@
 #include "types.h"
 #include "motions.h"
 #include "text_utils.h"
+#include "text_objects.h"
 
 void pan(View *view) {
-    if (view->cur_line < view->top_line) {
-        view->top_line = view->cur_line;
-    } else if (view->cur_line > view->top_line + view->vlimit - 1) {
-        view->top_line = view->cur_line - (view->vlimit - 1);
+    if (view->cur.line < view->top_line) {
+        view->top_line = view->cur.line;
+    } else if (view->cur.line > view->top_line + view->vlimit - 1) {
+        view->top_line = view->cur.line - (view->vlimit - 1);
     }
     // handle scrolling horizontally when desired_ch is off screen
-    if (view->cur_ch < view->left_ch) {
-        view->left_ch = view->cur_ch;
-    } else if (view->cur_ch > view->left_ch + view->hlimit - 1) {
-        view->left_ch = view->cur_ch - (view->hlimit - 1);
+    if (view->cur.ch < view->left_ch) {
+        view->left_ch = view->cur.ch;
+    } else if (view->cur.ch > view->left_ch + view->hlimit - 1) {
+        view->left_ch = view->cur.ch - (view->hlimit - 1);
     }
 }
 
 void move_up(FileProxy fp, View *view, MimState ms) {
-    if (view->cur_line == 0) {
+    if (view->cur.line == 0) {
         return;
     }
 
-    view->cur_line -= 1;
-    view->cur_ch = view->cur_desired_ch;
+    view->cur.line -= 1;
+    view->cur.ch = view->cur_desired_ch;
 
-    size_t above_len = fp.lines[view->cur_line]->len;
+    size_t above_len = fp.lines[view->cur.line]->len;
     if (above_len <= view->cur_desired_ch) {
         if (ms.mode == INSERT) {
-            view->cur_ch = above_len;
+            view->cur.ch = above_len;
         } else {
-            view->cur_ch = above_len - 1;
+            view->cur.ch = above_len - 1;
         }
     }
     if (above_len == 0) {
-        view->cur_ch = 0;
+        view->cur.ch = 0;
     }
 
     pan(view);
 }
 
 void move_down(FileProxy fp, View *view, MimState ms) {
-    if (view->cur_line == fp.len - 1) {
+    if (view->cur.line == fp.len - 1) {
         // can't move down, last line
         return;
     }
 
-    view->cur_line += 1;
-    view->cur_ch = view->cur_desired_ch;
+    view->cur.line += 1;
+    view->cur.ch = view->cur_desired_ch;
 
-    size_t below_len = fp.lines[view->cur_line]->len;
+    size_t below_len = fp.lines[view->cur.line]->len;
     if (below_len <= view->cur_desired_ch) {
         if (ms.mode == INSERT) {
-            view->cur_ch = below_len;
+            view->cur.ch = below_len;
         } else {
-            view->cur_ch = below_len - 1;
+            view->cur.ch = below_len - 1;
         }
     }
     if (below_len == 0) {
-        view->cur_ch = 0;
+        view->cur.ch = 0;
     }
 
     pan(view);
 }
 
 void move_left(FileProxy fp, View *view) {
-    if (view->cur_ch == 0) {
+    if (view->cur.ch == 0) {
         // can't move left, beginning of line
         return;
     }
 
-    view->cur_ch -= 1;
-    view->cur_desired_ch = view->cur_ch;
+    view->cur.ch -= 1;
+    view->cur_desired_ch = view->cur.ch;
 
     pan(view);
 }
 
 void move_right(FileProxy fp, View *view, MimState ms) {
     if (ms.mode == INSERT) {
-        if (view->cur_ch >= fp.lines[view->cur_line]->len) {
+        if (view->cur.ch >= fp.lines[view->cur.line]->len) {
             // can't move right, end of line
             return;
         }
     } else {
-        if (fp.lines[view->cur_line]->len == 0
-                || view->cur_ch >= (fp.lines[view->cur_line]->len) - 1) {
+        if (fp.lines[view->cur.line]->len == 0
+                || view->cur.ch >= (fp.lines[view->cur.line]->len) - 1) {
             // can't move right, end of line
             return;
         }
     }
 
-    view->cur_ch += 1;
-    view->cur_desired_ch = view->cur_ch;
+    view->cur.ch += 1;
+    view->cur_desired_ch = view->cur.ch;
+
+    pan(view);
+}
+
+void move_to_line(FileProxy fp, View *view, MimState ms, const size_t line) {
+    view->cur.line = line;
+    view->cur.ch = view->cur_desired_ch;
+
+    size_t line_len = fp.lines[view->cur.line]->len;
+    if (line_len <= view->cur_desired_ch) {
+        if (ms.mode == INSERT) {
+            view->cur.ch = line_len;
+        } else {
+            view->cur.ch = line_len - 1;
+        }
+    }
+    if (line_len == 0) {
+        view->cur.ch = 0;
+    }
 
     pan(view);
 }
@@ -116,7 +136,7 @@ void move_right(FileProxy fp, View *view, MimState ms) {
  * @return the new view after moving to the desired character
  */
 void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
-    Line *line = fp.lines[view->cur_line];
+    Line *line = fp.lines[view->cur.line];
     if (ms.mode == INSERT) {
         if (ch >= line->len) {
             return;
@@ -127,7 +147,7 @@ void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
         }
     }
 
-    view->cur_ch = ch;
+    view->cur.ch = ch;
     view->cur_desired_ch = ch;
 
     pan(view);
@@ -136,26 +156,26 @@ void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
 void move_to_eol(FileProxy fp, View *view, MimState ms) {
     size_t eol;
     if (ms.mode == INSERT) {
-        eol = fp.lines[view->cur_line]->len;
+        eol = fp.lines[view->cur.line]->len;
     } else {
-        eol = fp.lines[view->cur_line]->len - 1;
+        eol = fp.lines[view->cur.line]->len - 1;
     }
 
-    view->cur_ch = eol;
+    view->cur.ch = eol;
     view->cur_desired_ch = eol;
 
     pan(view);
 }
 
 void move_to_bol(FileProxy fp, View *view) {
-    view->cur_ch = 0;
+    view->cur.ch = 0;
     view->cur_desired_ch = 0;
 
     pan(view);
 }
 
 void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
-    Line *line = fp.lines[view->cur_line];
+    Line *line = fp.lines[view->cur.line];
 
     size_t ch_idx = get_len_ws_beginning(*line);
     if (ms.mode == INSERT) {
@@ -172,29 +192,37 @@ void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
 }
 
 void move_to_bof(FileProxy fp, View *view) {
-    view->cur_line = 0;
+    view->cur.line = 0;
 
-    size_t beg_len = fp.lines[view->cur_line]->len;
+    size_t beg_len = fp.lines[view->cur.line]->len;
     if (beg_len <= view->cur_desired_ch) {
-        view->cur_ch = beg_len - 1;
+        view->cur.ch = beg_len - 1;
     }
     if (beg_len == 0) {
-        view->cur_ch = 0;
+        view->cur.ch = 0;
     }
 
     pan(view);
 }
 
 void move_to_eof(FileProxy fp, View *view) {
-    view->cur_line = fp.lines[fp.len - 1]->num;
+    view->cur.line = fp.lines[fp.len - 1]->num;
 
-    size_t end_len = fp.lines[view->cur_line]->len;
+    size_t end_len = fp.lines[view->cur.line]->len;
     if (end_len <= view->cur_desired_ch) {
-        view->cur_ch = end_len - 1;
+        view->cur.ch = end_len - 1;
     }
     if (end_len == 0) {
-        view->cur_ch = 0;
+        view->cur.ch = 0;
     }
+
+    pan(view);
+}
+
+void move_to_beg_n_tobj(FileProxy fp, View *view, MimState ms, TextObject tobj) {
+    CurPos beg_n_tobj_pos = get_beg_pos_n_tobj(fp, view->cur, tobj);
+    move_to_line(fp, view, ms, beg_n_tobj_pos.line);
+    move_to_char(fp, view, ms, beg_n_tobj_pos.ch);
 
     pan(view);
 }
