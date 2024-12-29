@@ -74,47 +74,55 @@ CurPos get_end_pos_cur_word(FileProxy fp, CurPos current_pos) {
 
 CurPos get_beg_pos_n_word(FileProxy fp, CurPos current_pos) {
     // FIXME ignores empty lines and doesn't like the last char of the line
-    CurPos pos = current_pos;
-
     bool (*is_different)(const char);
-    if (is_word(fp.lines[pos.line]->text[pos.ch])) {
+    if (is_word(fp.lines[current_pos.line]->text[current_pos.ch])) {
         is_different = &is_not_word_not_ws;
-    } else if (is_not_word_not_ws(fp.lines[pos.line]->text[pos.ch])) {
+    } else if (is_not_word_not_ws(fp.lines[current_pos.line]->text[current_pos.ch])) {
         is_different = &is_word;
     } else {
         is_different = &is_not_ws;
     }
 
     bool seen_ws = false;
-    for (size_t l = pos.line; l < fp.len; l++) {
-        size_t c = l == pos.line ? pos.ch : 0; // start at the first char on each line after the current
+    for (size_t l = current_pos.line; l < fp.len; l++) {
+        size_t c;
+        if (l == current_pos.line) {
+            c = current_pos.ch;
+        } else {
+            // start at the first char on each line after the current
+            c = 0;
+            // also check that if we are on a new empty line because that counts
+            // as the beginning of a word (but not the end aparrently)
+            if (fp.lines[l]->len == 0) {
+                CurPos new_pos = {l, c};
+                return new_pos;
+            }
+            // a word of the same type (word or punctuation) continuing on the next line is a new word
+            seen_ws = true;
+        }
         for ( ; c < fp.lines[l]->len; c++) {
             char ch = fp.lines[l]->text[c];
             if (isspace(ch)) {
                 seen_ws = true;
             }
             if (seen_ws) {
-                is_different = &is_not_ws; // once we've seen whitespace, words or punctuation are fair game
+                // once we've seen whitespace, words or punctuation are fair game
+                is_different = &is_not_ws;
             }
             if (is_different(ch)) {
-                pos.line = l;
-                pos.ch = c;
-                log_to_file("we found something");
-                return pos;
-            } else {
-                pos.line = l;
-                pos.ch = c;
+                CurPos new_pos = {l, c};
+                return new_pos;
             }
         }
     }
-    return pos;
+    return current_pos;
 }
 
 CurPos get_beg_pos_cur_tobj(FileProxy fp, CurPos current_pos, TextObject tobj) {
-switch (tobj) {
-    case WORD:
-        return get_beg_pos_cur_word(fp, current_pos);
-}
+    switch (tobj) {
+        case WORD:
+            return get_beg_pos_cur_word(fp, current_pos);
+    }
 }
 
 CurPos get_end_pos_cur_tobj(FileProxy fp, CurPos current_pos, TextObject tobj) {

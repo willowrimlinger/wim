@@ -5,6 +5,7 @@
  * Functions to display the program onto the ncurses window
  */
 
+#include <string.h>
 #include <ncurses.h>
 
 #include "types.h"
@@ -45,6 +46,11 @@ void display_status_bar(MimState ms) {
     printw("%s", mode_str);
     
     // message
+    // FIXME buncha weird stuff appears if you move around after a msg is displayed
+    if (ms.status_msg != NULL) {
+        move(LINES - 1, COLS - 1 - strlen(ms.status_msg));
+        printw("%s", ms.status_msg);
+    }
 }
 
 void display(MimState ms, FileProxy fp, View view) {

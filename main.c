@@ -142,7 +142,7 @@ static void loop(FileProxy fp, const char *filename) {
                     insert_newline(&fp, &view, ms);
                     break;
                 case 'w':
-                    move_to_beg_n_tobj(fp, &view, ms, WORD);
+                    move_to_beg_n_tobj(fp, &view, WORD);
                     break;
             }
         }

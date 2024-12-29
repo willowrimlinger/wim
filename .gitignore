@@ -4,3 +4,5 @@
 mim
 *.swp
 mim.log
+compile_commands.json
+.cache/

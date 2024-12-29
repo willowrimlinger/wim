@@ -219,10 +219,10 @@ void move_to_eof(FileProxy fp, View *view) {
     pan(view);
 }
 
-void move_to_beg_n_tobj(FileProxy fp, View *view, MimState ms, TextObject tobj) {
+void move_to_beg_n_tobj(FileProxy fp, View *view, TextObject tobj) {
     CurPos beg_n_tobj_pos = get_beg_pos_n_tobj(fp, view->cur, tobj);
-    move_to_line(fp, view, ms, beg_n_tobj_pos.line);
-    move_to_char(fp, view, ms, beg_n_tobj_pos.ch);
+    view->cur.line = beg_n_tobj_pos.line;
+    view->cur.ch = beg_n_tobj_pos.ch;
 
     pan(view);
 }
