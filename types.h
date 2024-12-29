@@ -24,6 +24,14 @@ typedef struct FileProxy_s {
     size_t len;
 } FileProxy;
 
+/** A position in a FileProxy */
+typedef struct CurPos_s {
+    // the character that the cursor is on
+    size_t line;
+    // the character that the cursor is on
+    size_t ch;
+} CurPos;
+
 /** Represents a cursor position in a FileProxy as well as where in the file you are viewing */
 typedef struct View_s {
     // the line that should be at the top of the screen
@@ -34,10 +42,8 @@ typedef struct View_s {
     size_t vlimit;
     // the number of cols available to display the FileProxy in
     size_t hlimit;
-    // the line that the cursor is on
-    size_t cur_line;
-    // the character that the cursor is on
-    size_t cur_ch;
+    // the cursor position
+    CurPos cur;
     // the character that the cursor should be moved to if the line is long enough
     size_t cur_desired_ch;
 } View;
@@ -53,8 +59,18 @@ typedef enum Mode_e {
  * across buffers and there should only be one per program.
  */
 typedef struct MimState_s {
+    char *status_msg;
     Mode mode;
 } MimState;
+
+/** 
+ * Text objects that can be operated on or moved through. What they represent is
+ * defined in the functions in text_objects.c. If C were object oriented, they'd
+ * just have class methods, but alas.
+ */
+typedef enum TextObject_e {
+    WORD,
+} TextObject;
 
 #endif
 

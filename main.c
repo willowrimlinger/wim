@@ -23,7 +23,7 @@ static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTY
 
 static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
-    MimState ms = {NORMAL};
+    MimState ms = {NULL, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
     while (1) {
         display(ms, fp, view);
@@ -140,6 +140,9 @@ static void loop(FileProxy fp, const char *filename) {
                     switch_mode(fp, &view, &ms, INSERT);
                     move_to_eol(fp, &view, ms);
                     insert_newline(&fp, &view, ms);
+                    break;
+                case 'w':
+                    move_to_beg_n_tobj(fp, &view, ms, WORD);
                     break;
             }
         }

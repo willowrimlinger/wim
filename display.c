@@ -14,7 +14,7 @@ size_t min(size_t a, size_t b) {
 }
 
 void move_cur(View view) {
-    move(view.cur_line - view.top_line, view.cur_ch - view.left_ch);
+    move(view.cur.line - view.top_line, view.cur.ch - view.left_ch);
 }
 
 /** 
@@ -36,12 +36,15 @@ void display_fp(FileProxy fp, View view) {
 }
 
 void display_status_bar(MimState ms) {
+    // mode
     char *mode_str = "";
     if (ms.mode == INSERT) {
         mode_str = "-- INSERT --";
     }
     move(LINES - 1, 0);
-    printw(mode_str);
+    printw("%s", mode_str);
+    
+    // message
 }
 
 void display(MimState ms, FileProxy fp, View view) {
