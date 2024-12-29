@@ -34,7 +34,7 @@ void move_to_bof(FileProxy fp, View *view);
 
 void move_to_eof(FileProxy fp, View *view);
 
-void move_to_beg_n_tobj(FileProxy fp, View *view, MimState ms, TextObject tobj);
+void move_to_beg_n_tobj(FileProxy fp, View *view, TextObject tobj);
 
 #endif
 
