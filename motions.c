@@ -227,3 +227,11 @@ void move_to_beg_n_tobj(FileProxy fp, View *view, TextObject tobj) {
     pan(view);
 }
 
+void move_to_beg_p_tobj(FileProxy fp, View *view, TextObject tobj) {
+    CurPos beg_p_tobj_pos = get_beg_pos_p_tobj(fp, view->cur, tobj);
+    view->cur.line = beg_p_tobj_pos.line;
+    view->cur.ch = beg_p_tobj_pos.ch;
+
+    pan(view);
+}
+

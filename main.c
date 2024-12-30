@@ -144,6 +144,9 @@ static void loop(FileProxy fp, const char *filename) {
                 case 'w':
                     move_to_beg_n_tobj(fp, &view, WORD);
                     break;
+                case 'b':
+                    move_to_beg_p_tobj(fp, &view, WORD);
+                    break;
             }
         }
     }

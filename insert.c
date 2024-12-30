@@ -268,7 +268,6 @@ void insert_newline(FileProxy *fp, View *view, MimState ms) {
 
     // add the text from cursor to eol to the new line including indent
     size_t indent_len = get_len_ws_beginning(*cur_line);
-    log_to_file("indent len: %lu", indent_len);
     check_and_realloc_line(new_line, text_to_eol_len + indent_len);
     strncpy(new_line->text, cur_line->text, indent_len); // add indent
     strcpy(new_line->text + indent_len, cur_line->text + view->cur.ch); // add rest of text
