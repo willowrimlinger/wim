@@ -13,7 +13,6 @@
 #include "log.h"
 #include "types.h"
 #include "fileproxy.h"
-#include "motions.h"
 
 static const size_t byte = sizeof(unsigned char);
 static const size_t TEXT_BUF_INCR = 16;

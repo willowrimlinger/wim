@@ -7,5 +7,5 @@
 
 #include "types.h"
 
-void display(MimState ms, FileProxy fp, View view);
+void display(MimState ms, FileProxy fp, View *view);
 

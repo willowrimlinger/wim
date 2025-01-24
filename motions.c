@@ -15,17 +15,11 @@
 #include "text_utils.h"
 #include "text_objects.h"
 
-void pan(View *view) {
+void scroll_vertically(View *view) {
     if (view->cur.line < view->top_line) {
         view->top_line = view->cur.line;
-    } else if (view->cur.line > view->top_line + view->vlimit - 1) {
+    } else if (view->cur.line > view->top_line + view->num_lines - 1) {
         view->top_line = view->cur.line - (view->vlimit - 1);
-    }
-    // handle scrolling horizontally when desired_ch is off screen
-    if (view->cur.ch < view->left_ch) {
-        view->left_ch = view->cur.ch;
-    } else if (view->cur.ch > view->left_ch + view->hlimit - 1) {
-        view->left_ch = view->cur.ch - (view->hlimit - 1);
     }
 }
 
@@ -49,7 +43,7 @@ void move_up(FileProxy fp, View *view, MimState ms) {
         view->cur.ch = 0;
     }
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_down(FileProxy fp, View *view, MimState ms) {
@@ -73,7 +67,7 @@ void move_down(FileProxy fp, View *view, MimState ms) {
         view->cur.ch = 0;
     }
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_left(FileProxy fp, View *view) {
@@ -85,7 +79,7 @@ void move_left(FileProxy fp, View *view) {
     view->cur.ch -= 1;
     view->cur_desired_ch = view->cur.ch;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_right(FileProxy fp, View *view, MimState ms) {
@@ -105,7 +99,7 @@ void move_right(FileProxy fp, View *view, MimState ms) {
     view->cur.ch += 1;
     view->cur_desired_ch = view->cur.ch;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_line(FileProxy fp, View *view, MimState ms, const size_t line) {
@@ -124,7 +118,7 @@ void move_to_line(FileProxy fp, View *view, MimState ms, const size_t line) {
         view->cur.ch = 0;
     }
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 /**
@@ -150,7 +144,7 @@ void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
     view->cur.ch = ch;
     view->cur_desired_ch = ch;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_eol(FileProxy fp, View *view, MimState ms) {
@@ -164,14 +158,14 @@ void move_to_eol(FileProxy fp, View *view, MimState ms) {
     view->cur.ch = eol;
     view->cur_desired_ch = eol;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_bol(FileProxy fp, View *view) {
     view->cur.ch = 0;
     view->cur_desired_ch = 0;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
@@ -188,7 +182,7 @@ void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
 
     move_to_char(fp, view, ms, ch_idx);
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_bof(FileProxy fp, View *view) {
@@ -202,7 +196,7 @@ void move_to_bof(FileProxy fp, View *view) {
         view->cur.ch = 0;
     }
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_eof(FileProxy fp, View *view) {
@@ -216,7 +210,7 @@ void move_to_eof(FileProxy fp, View *view) {
         view->cur.ch = 0;
     }
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_beg_n_tobj(FileProxy fp, View *view, TextObject tobj) {
@@ -224,7 +218,7 @@ void move_to_beg_n_tobj(FileProxy fp, View *view, TextObject tobj) {
     view->cur.line = beg_n_tobj_pos.line;
     view->cur.ch = beg_n_tobj_pos.ch;
 
-    pan(view);
+    scroll_vertically(view);
 }
 
 void move_to_beg_p_tobj(FileProxy fp, View *view, TextObject tobj) {
@@ -232,6 +226,6 @@ void move_to_beg_p_tobj(FileProxy fp, View *view, TextObject tobj) {
     view->cur.line = beg_p_tobj_pos.line;
     view->cur.ch = beg_p_tobj_pos.ch;
 
-    pan(view);
+    scroll_vertically(view);
 }
 

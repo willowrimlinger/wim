@@ -34,11 +34,11 @@ typedef struct CurPos_s {
 
 /** Represents a cursor position in a FileProxy as well as where in the file you are viewing */
 typedef struct View_s {
-    // the line that should be at the top of the screen
+    // the line that should appear at the top of the screen
     size_t top_line;
-    // the character/column that should be at the left of the screen
-    size_t left_ch;
-    // the number of lines available to display the FileProxy in
+    // the number of lines that are currently being displayed
+    size_t num_lines;
+    // the number of columns (not characters!) that we have scrolled to the right
     size_t vlimit;
     // the number of cols available to display the FileProxy in
     size_t hlimit;

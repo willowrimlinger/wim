@@ -18,15 +18,15 @@
 #include "insert.h"
 #include "display.h"
 
-static const int NORMAL_KEYS_LEN = 96;
-static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>? ";
+static const int NORMAL_KEYS_LEN = 97;
+static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>? \t";
 
 static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
     MimState ms = {NULL, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
     while (1) {
-        display(ms, fp, view);
+        display(ms, fp, &view);
         int key = getch();
         if (ms.mode == INSERT) { // insert mode
             switch (key) {
