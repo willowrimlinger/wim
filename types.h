@@ -51,7 +51,8 @@ typedef struct View_s {
 /** The current mode of the mim program */
 typedef enum Mode_e {
     NORMAL,
-    INSERT
+    INSERT,
+    COMMAND,
 } Mode;
 
 /**
@@ -60,6 +61,7 @@ typedef enum Mode_e {
  */
 typedef struct MimState_s {
     char *status_msg;
+    char *command;
     Mode mode;
 } MimState;
 
