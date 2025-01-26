@@ -38,12 +38,12 @@ void display_fp(FileProxy fp, View view) {
 
 void display_status_bar(MimState ms) {
     // mode
-    char *mode_str = "";
-    if (ms.mode == INSERT) {
-        mode_str = "-- INSERT --";
-    }
     move(LINES - 1, 0);
-    printw("%s", mode_str);
+    if (ms.mode == INSERT) {
+        printw("%s", "-- INSERT --");
+    } else if (ms.mode == COMMAND) {
+        printw(":%s", ms.command);
+    }
     
     // message
     // FIXME buncha weird stuff appears if you move around after a msg is displayed
