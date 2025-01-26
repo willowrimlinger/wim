@@ -23,8 +23,7 @@ static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTY
 
 static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
-    char command[MAX_COMMAND_LEN];
-    command[0] = '\0';
+    Line *command = create_line(0);
     MimState ms = {NULL, command, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
     while (1) {

@@ -9,20 +9,16 @@
 
 #include <stdio.h>
 #include <ncurses.h>
+#include <string.h>
+#include <stdbool.h>
 
 #include "log.h"
 #include "types.h"
 #include "fileproxy.h"
-#include "motions.h"
 
 static const size_t byte = sizeof(unsigned char);
 static const size_t TEXT_BUF_INCR = 16;
 
-/**
- * Creates a new empty Line with a beginning buffer capacity of TEXT_BUF_INCR
- *
- * @return the newly created line
- */
 Line *create_line(size_t line_num) {
     Line *line = malloc(sizeof(Line));
     char *text = malloc((TEXT_BUF_INCR + 1) * byte); // +1 for terminating null byte
@@ -31,15 +27,6 @@ Line *create_line(size_t line_num) {
     return line;
 }
 
-/**
- * Adjusts the text buffer of a line. Checks if the given line is full and the 
- * buffer needs to be increased or if the line has space to reduce the buffer.
- * Adjusts the capacity of the line.
- *
- * @param line the line to check and potentially increase
- * @param additional_text_len the number of chars that are being added (or subtracted), not including \0
- *     from the line from which the new buffer calculations will be adjusted to
- */
 void check_and_realloc_line(Line *line, size_t additional_text_len) {
     // check that we actually need to realloc
     size_t ideal_num_buffers = ((line->len + additional_text_len + 1) / TEXT_BUF_INCR) + 1;
@@ -57,13 +44,18 @@ void check_and_realloc_line(Line *line, size_t additional_text_len) {
     }
 }
 
-/**
- * Converts a text buffer containing the contents of a file into a FileProxy
- * 
- * @param buffer the text buffer to convert
- * @param buf_len the length in characters of the buffer
- * @return A FileProxy whose Lines have been filled with the contents of the buffer
- */
+bool linecmp(Line *line, const char *string) {
+    if (strlen(string) != line->len) {
+        return false;
+    }
+    for (size_t i = 0; i < line->len; i++) {
+        if (line->text[i] != string[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 FileProxy split_buffer(const char *buffer, size_t buf_len) {
     size_t num_lines = 1;
     for (size_t i = 0; i < buf_len; i++) {
@@ -98,7 +90,6 @@ FileProxy split_buffer(const char *buffer, size_t buf_len) {
     return fp;
 }
 
-/** Debug function to see everything about a FileProxy */
 void log_fp(FileProxy fp) {
     log_to_file("fileproxy:");
     for (size_t i = 0; i < fp.len; i++) {
@@ -113,11 +104,6 @@ void log_fp(FileProxy fp) {
     }
 }
 
-/**
- * Frees a FileProxy and all text within it
- *
- * @param fp the FileProxy to free
- */
 void free_fp(FileProxy fp) {
     for (size_t i = 0; i < fp.len; i++) {
         free(fp.lines[i]->text);
@@ -129,12 +115,6 @@ void free_fp(FileProxy fp) {
     fp.lines = NULL;
 }
 
-/**
- * Writes the contents of a FileProxy to a file, overwriting all previous contents
- *
- * @param fp the FileProxy to write to disk
- * @param filename the name of the file to write to
- */
 void write_fp(FileProxy fp, const char *filename) {
     log_fp(fp);
     FILE *file = fopen(filename, "w");

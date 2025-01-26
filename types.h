@@ -61,7 +61,7 @@ typedef enum Mode_e {
  */
 typedef struct MimState_s {
     char *status_msg;
-    char *command;
+    Line *command;
     Mode mode;
 } MimState;
 
