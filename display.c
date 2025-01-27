@@ -48,18 +48,9 @@ void display_status_bar(MimState ms) {
             ms.cmd_view->left_ch + ms.cmd_view->hlimit,
             ms.cmd_fp->lines[0]->len
         );
-        log_to_file("char limit: %lu", char_limit);
         for (size_t i = ms.cmd_view->left_ch; i < char_limit; i++) {
-            log_to_file("left char: %lu", ms.cmd_view->left_ch);
             mvaddch(LINES - 1, i - ms.cmd_view->left_ch + 1, ms.cmd_fp->lines[0]->text[i]);
         }
-    }
-    
-    // message
-    // FIXME buncha weird stuff appears if you move around after a msg is displayed
-    if (ms.status_msg != NULL) {
-        move(LINES - 1, COLS - 1 - strlen(ms.status_msg));
-        printw("%s", ms.status_msg);
     }
 }
 

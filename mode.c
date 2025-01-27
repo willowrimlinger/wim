@@ -55,22 +55,18 @@ void switch_mode(FileProxy fp, View *view, MimState *ms, Mode new_mode) {
         case NORMAL:
             break;
         case COMMAND:
-            log_to_file("Coming from cmd");
             switch_from_command_mode(ms);
             break;
         
     }
     switch (new_mode) {
         case INSERT:
-            log_to_file("Switching to insert");
             switch_to_insert_mode(ms);
             break;
         case NORMAL:
-            log_to_file("Switching to normal");
             switch_to_normal_mode(fp, view, ms);
             break;
         case COMMAND:
-            log_to_file("Switching to command");
             switch_to_command_mode(ms);
             break;
     }
