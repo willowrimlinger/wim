@@ -27,7 +27,8 @@ static void loop(FileProxy fp, const char *filename) {
     View view = {0, 0, LINES - 1, COLS, init_cur, 0};
     FileProxy cmd_fp = create_empty_fp();
     View cmd_view = {0, 0, 1, COLS - 1, 0, 0, 0};
-    MimState ms = {&cmd_fp, &cmd_view, NORMAL};
+    char status_msg[MAX_STATUS_MSG_LEN];
+    MimState ms = {&cmd_fp, &cmd_view, status_msg, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
     bool running = true;
     while (running) {

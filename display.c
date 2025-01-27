@@ -40,9 +40,7 @@ void display_fp(FileProxy fp, View view) {
 void display_status_bar(MimState ms) {
     // mode
     move(LINES - 1, 0);
-    if (ms.mode == INSERT) {
-        printw("%s", "-- INSERT --");
-    } else if (ms.mode == COMMAND) {
+    if (ms.mode == COMMAND) {
         printw(":");
         size_t char_limit = min(
             ms.cmd_view->left_ch + ms.cmd_view->hlimit,
@@ -51,6 +49,10 @@ void display_status_bar(MimState ms) {
         for (size_t i = ms.cmd_view->left_ch; i < char_limit; i++) {
             mvaddch(LINES - 1, i - ms.cmd_view->left_ch + 1, ms.cmd_fp->lines[0]->text[i]);
         }
+    } else if (ms.mode == INSERT) {
+        printw("%s", "-- INSERT --");
+    } else {
+        printw("%s", ms.status_msg);
     }
 }
 

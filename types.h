@@ -62,6 +62,7 @@ typedef enum Mode_e {
 typedef struct MimState_s {
     FileProxy *cmd_fp;
     View *cmd_view;
+    char *status_msg;
     Mode mode;
 } MimState;
 
