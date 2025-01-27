@@ -40,12 +40,6 @@ void insert_char(char ch, FileProxy *fp, View *view, MimState ms) {
 
     // insert char
     line->text[view->cur.ch] = ch;
-    log_to_file("i be inserting a char");
-    log_to_file("line len: lu", line->len);
-    log_to_file("contents:");
-    for (size_t i = 0; i < line->len; i++) {
-        log_to_file("%c", line->text[i]);
-    }
     // move cursor
     move_right(*fp, view, ms);
 }

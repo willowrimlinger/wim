@@ -46,7 +46,6 @@ CurPos get_beg_pos_cur_word(FileProxy fp, CurPos current_pos) {
     for (size_t c = current_pos.ch; c-- > 0; ) {
         char ch = fp.lines[pos.line]->text[c];
         if (is_different(ch)) {
-            log_to_file("the beginning of the word is at l: %lu, c: %lu", pos.line, pos.ch);
             return pos;
         }
         pos.ch = c;

@@ -60,7 +60,6 @@ typedef enum Mode_e {
  * across buffers and there should only be one per program.
  */
 typedef struct MimState_s {
-    char *status_msg;
     FileProxy *cmd_fp;
     View *cmd_view;
     Mode mode;
