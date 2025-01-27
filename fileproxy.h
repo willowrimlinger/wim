@@ -75,8 +75,9 @@ void free_fp(FileProxy fp);
  *
  * @param fp the FileProxy to write to disk
  * @param filename the name of the file to write to
+ * @return the number of bytes in the file
  */
-void write_fp(FileProxy fp, const char *filename);
+size_t write_fp(FileProxy fp, const char *filename);
 
 #endif
 

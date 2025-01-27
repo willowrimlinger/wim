@@ -6,6 +6,8 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "fileproxy.h"
 #include "log.h"
@@ -13,10 +15,13 @@
 #include "command.h"
 #include "mode.h"
 #include "insert.h"
+#include "display.h"
 
 bool exec_command(MimState *ms, FileProxy fp, View *view, const char *filename) {
+    char status_msg[MAX_STATUS_MSG_LEN];
     if (linecmp(ms->cmd_fp->lines[0], "w")) {
-        write_fp(fp, filename);
+        size_t size = write_fp(fp, filename);
+        sprintf(status_msg, "\"%s\" %luL, %luB written", filename, fp.len, size);
     } else if (linecmp(ms->cmd_fp->lines[0], "q")) {
         return false;
     } else if (linecmp(ms->cmd_fp->lines[0], "wq")) {
@@ -24,6 +29,6 @@ bool exec_command(MimState *ms, FileProxy fp, View *view, const char *filename) 
         return false;
     }
     switch_mode(fp, view, ms, NORMAL);
-    // TODO message
+    strcpy(ms->status_msg, status_msg);
     return true;
 }

@@ -124,8 +124,7 @@ void free_fp(FileProxy fp) {
     fp.lines = NULL;
 }
 
-void write_fp(FileProxy fp, const char *filename) {
-    log_fp(fp);
+size_t write_fp(FileProxy fp, const char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         fprintf(stderr, "Error saving %s\n", filename);
@@ -137,7 +136,12 @@ void write_fp(FileProxy fp, const char *filename) {
         }
         fprintf(file, "\n");
     }
+    
+    // get file size
+    fseek(file, 0, SEEK_END);
+    size_t file_size = ftell(file);
 
     fclose(file);
+    return file_size;
 }
 

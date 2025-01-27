@@ -12,7 +12,9 @@
 #include "motions.h"
 #include "log.h"
 
-static const size_t COMMAND_BUF_INCR = 16;
+void clear_status_msg(MimState *ms) {
+    ms->status_msg[0] = '\0';
+}
 
 void switch_to_insert_mode(MimState *ms) {
     ms->mode = INSERT;
@@ -70,5 +72,6 @@ void switch_mode(FileProxy fp, View *view, MimState *ms, Mode new_mode) {
             switch_to_command_mode(ms);
             break;
     }
+    clear_status_msg(ms);
 }
 
