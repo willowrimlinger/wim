@@ -5,6 +5,7 @@
  * wim - a stupid text editor
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,7 +29,8 @@ static void loop(FileProxy fp, const char *filename) {
     View cmd_view = {0, 0, 1, COLS - 1, 0, 0, 0};
     MimState ms = {NULL, &cmd_fp, &cmd_view, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
-    while (1) {
+    bool running = true;
+    while (running) {
         display(ms, fp, view);
         int key = getch();
         switch (ms.mode) {
@@ -168,7 +170,7 @@ static void loop(FileProxy fp, const char *filename) {
                     case KEY_ENTER:
                     case '\n':
                     case '\r':
-                        exec_command(&ms, fp, &view, filename);
+                        running = exec_command(&ms, fp, &view, filename);
                         break;
                     case KEY_END:
                         move_to_eol(*ms.cmd_fp, ms.cmd_view, ms);
