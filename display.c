@@ -9,6 +9,7 @@
 #include <ncurses.h>
 
 #include "types.h"
+#include "log.h"
 
 size_t min(size_t a, size_t b) {
     return a < b ? a : b;
@@ -42,7 +43,16 @@ void display_status_bar(MimState ms) {
     if (ms.mode == INSERT) {
         printw("%s", "-- INSERT --");
     } else if (ms.mode == COMMAND) {
-        printw(":%s", ms.command);
+        printw(":");
+        size_t char_limit = min(
+            ms.cmd_view->left_ch + ms.cmd_view->hlimit,
+            ms.cmd_fp->lines[0]->len
+        );
+        log_to_file("char limit: %lu", char_limit);
+        for (size_t i = ms.cmd_view->left_ch; i < char_limit; i++) {
+            log_to_file("left char: %lu", ms.cmd_view->left_ch);
+            mvaddch(LINES - 1, i - ms.cmd_view->left_ch + 1, ms.cmd_fp->lines[0]->text[i]);
+        }
     }
     
     // message
@@ -58,7 +68,11 @@ void display(MimState ms, FileProxy fp, View view) {
 
     display_fp(fp, view);
     display_status_bar(ms);
-    move_cur(view);
+    if (ms.mode == COMMAND) {
+        move(LINES - 1, ms.cmd_view->cur.ch + 1 - ms.cmd_view->left_ch);
+    } else {
+        move_cur(view);
+    }
 
     refresh();
 }

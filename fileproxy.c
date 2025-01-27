@@ -22,6 +22,7 @@ static const size_t TEXT_BUF_INCR = 16;
 Line *create_line(size_t line_num) {
     Line *line = malloc(sizeof(Line));
     char *text = malloc((TEXT_BUF_INCR + 1) * byte); // +1 for terminating null byte
+    text[0] = '\0';
     Line new_line = {text, line_num, 0, TEXT_BUF_INCR};
     *line = new_line;
     return line;
@@ -54,6 +55,14 @@ bool linecmp(Line *line, const char *string) {
         }
     }
     return true;
+}
+
+FileProxy create_empty_fp() {
+    Line **lines = malloc(sizeof(Line *));
+    Line *first_line = create_line(0);
+    lines[0] = first_line;
+    FileProxy fp = {lines, 1};
+    return fp;
 }
 
 FileProxy split_buffer(const char *buffer, size_t buf_len) {

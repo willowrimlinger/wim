@@ -39,7 +39,7 @@ void move_up(FileProxy fp, View *view, MimState ms) {
 
     size_t above_len = fp.lines[view->cur.line]->len;
     if (above_len <= view->cur_desired_ch) {
-        if (ms.mode == INSERT) {
+        if (ms.mode == INSERT || ms.mode == COMMAND) {
             view->cur.ch = above_len;
         } else {
             view->cur.ch = above_len - 1;
@@ -63,7 +63,7 @@ void move_down(FileProxy fp, View *view, MimState ms) {
 
     size_t below_len = fp.lines[view->cur.line]->len;
     if (below_len <= view->cur_desired_ch) {
-        if (ms.mode == INSERT) {
+        if (ms.mode == INSERT || ms.mode == COMMAND) {
             view->cur.ch = below_len;
         } else {
             view->cur.ch = below_len - 1;
@@ -89,7 +89,7 @@ void move_left(FileProxy fp, View *view) {
 }
 
 void move_right(FileProxy fp, View *view, MimState ms) {
-    if (ms.mode == INSERT) {
+    if (ms.mode == INSERT || ms.mode == COMMAND) {
         if (view->cur.ch >= fp.lines[view->cur.line]->len) {
             // can't move right, end of line
             return;
@@ -114,7 +114,7 @@ void move_to_line(FileProxy fp, View *view, MimState ms, const size_t line) {
 
     size_t line_len = fp.lines[view->cur.line]->len;
     if (line_len <= view->cur_desired_ch) {
-        if (ms.mode == INSERT) {
+        if (ms.mode == INSERT || ms.mode == COMMAND) {
             view->cur.ch = line_len;
         } else {
             view->cur.ch = line_len - 1;
@@ -137,7 +137,7 @@ void move_to_line(FileProxy fp, View *view, MimState ms, const size_t line) {
  */
 void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
     Line *line = fp.lines[view->cur.line];
-    if (ms.mode == INSERT) {
+    if (ms.mode == INSERT || ms.mode == COMMAND) {
         if (ch >= line->len) {
             return;
         }
@@ -155,7 +155,7 @@ void move_to_char(FileProxy fp, View *view, MimState ms, const size_t ch) {
 
 void move_to_eol(FileProxy fp, View *view, MimState ms) {
     size_t eol;
-    if (ms.mode == INSERT) {
+    if (ms.mode == INSERT || ms.mode == COMMAND) {
         eol = fp.lines[view->cur.line]->len;
     } else {
         eol = fp.lines[view->cur.line]->len - 1;
@@ -178,7 +178,7 @@ void move_to_bol_non_ws(FileProxy fp, View *view, MimState ms) {
     Line *line = fp.lines[view->cur.line];
 
     size_t ch_idx = get_len_ws_beginning(*line);
-    if (ms.mode == INSERT) {
+    if (ms.mode == INSERT || ms.mode == COMMAND) {
         if (line->len > 0) {
             if (ch_idx == line->len - 1) {
                 ch_idx++;
