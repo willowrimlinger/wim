@@ -55,6 +55,13 @@ typedef enum Mode_e {
     COMMAND,
 } Mode;
 
+/** A register that stores text */
+
+/** Holds all registers */
+typedef struct Registers_s {
+    FileProxy *unnamed;
+} Registers;
+
 /**
  * Represents the internal state of the mim program. This stuff is "global" 
  * across buffers and there should only be one per program.
@@ -64,6 +71,7 @@ typedef struct MimState_s {
     View *cmd_view;
     char *status_msg;
     Mode mode;
+    Registers *registers;
 } MimState;
 
 /** 

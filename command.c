@@ -1,5 +1,5 @@
 /**
- * @file insert.c
+ * @file command.c
  * @author Max Rimlinger
  *
  * Functions for manipulating and executing commands in command mode
