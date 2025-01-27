@@ -9,7 +9,8 @@
 #define COMMAND_H
 
 #include "types.h"
+#include <stdbool.h>
 
-void exec_command(MimState *ms, FileProxy fp, View *view, const char *filename);
+bool exec_command(MimState *ms, FileProxy fp, View *view, const char *filename);
 
 #endif
