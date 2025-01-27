@@ -45,6 +45,13 @@ void check_and_realloc_line(Line *line, size_t additional_text_len);
 bool linecmp(Line *line, const char *string);
 
 /**
+ * Creates an empty FileProxy with a single blank line.
+ *
+ * @return an empty FileProxy
+ */
+FileProxy create_empty_fp();
+
+/**
  * Converts a text buffer containing the contents of a file into a FileProxy
  * 
  * @param buffer the text buffer to convert

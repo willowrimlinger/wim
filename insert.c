@@ -18,7 +18,7 @@
 static const size_t byte = sizeof(unsigned char);
 
 /**
- * Inserts one character into the file at the given cursor position and moves the
+ * Inserts one character into the file at the current cursor position and moves the
  * cursor over one.
  *
  * @param ch the character to insert
@@ -40,7 +40,12 @@ void insert_char(char ch, FileProxy *fp, View *view, MimState ms) {
 
     // insert char
     line->text[view->cur.ch] = ch;
-    
+    log_to_file("i be inserting a char");
+    log_to_file("line len: lu", line->len);
+    log_to_file("contents:");
+    for (size_t i = 0; i < line->len; i++) {
+        log_to_file("%c", line->text[i]);
+    }
     // move cursor
     move_right(*fp, view, ms);
 }

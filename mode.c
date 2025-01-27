@@ -7,6 +7,7 @@
 
 #include <ncurses.h>
 
+#include "fileproxy.h"
 #include "types.h"
 #include "motions.h"
 #include "log.h"
@@ -32,7 +33,20 @@ void switch_to_command_mode(MimState *ms) {
 }
 
 void switch_from_command_mode(MimState *ms) {
-    ms->command[0] = '\0';
+    // clear line
+    Line *line = ms->cmd_fp->lines[0];
+    free(line->text);
+    free(line);
+    line = create_line(0);
+
+    // clear view
+    ms->cmd_view->top_line = 0;
+    ms->cmd_view->left_ch = 0;
+    ms->cmd_view->vlimit = 1;
+    ms->cmd_view->hlimit = COLS - 1;
+    ms->cmd_view->cur.ch = 0;
+    ms->cmd_view->cur.line = 0;
+    ms->cmd_view->cur_desired_ch = 0;
 }
 
 void switch_mode(FileProxy fp, View *view, MimState *ms, Mode new_mode) {

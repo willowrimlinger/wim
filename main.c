@@ -22,9 +22,11 @@
 static const char *NORMAL_KEYS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qwertyuiop[]\\QWERTYUIOP{}|asdfghjkl;'ASDFGHJKL:\"zxcvbnm,./ZXCVBNM<>? ";
 
 static void loop(FileProxy fp, const char *filename) {
-    View view = {0, 0, LINES - 1, COLS, 0, 0, 0};
-    Line *command = create_line(0);
-    MimState ms = {NULL, command, NORMAL};
+    CurPos init_cur = {0, 0};
+    View view = {0, 0, LINES - 1, COLS, init_cur, 0};
+    FileProxy cmd_fp = create_empty_fp();
+    View cmd_view = {0, 0, 1, COLS - 1, 0, 0, 0};
+    MimState ms = {NULL, &cmd_fp, &cmd_view, NORMAL};
     switch_mode(fp, &view, &ms, NORMAL);
     while (1) {
         display(ms, fp, view);
@@ -151,35 +153,40 @@ static void loop(FileProxy fp, const char *filename) {
                         move_to_beg_p_tobj(fp, &view, WORD);
                         break;
                     case ':':
-                        log_to_file("pressed :");
                         switch_mode(fp, &view, &ms, COMMAND);
                         break;
                 }
                     break;
             case COMMAND:
                 switch (key) {
+                    case KEY_LEFT:
+                        move_left(*ms.cmd_fp, ms.cmd_view);
+                        break;
+                    case KEY_RIGHT:
+                        move_right(*ms.cmd_fp, ms.cmd_view, ms);
+                        break;
                     case KEY_ENTER:
                     case '\n':
                     case '\r':
                         exec_command(&ms, fp, &view, filename);
                         break;
-                    case KEY_BACKSPACE:
-                        // TODO backspace
-                        break;
-                    case KEY_DC:
-                        // TODO delete
-                        break;
                     case KEY_END:
-                        // TODO
+                        move_to_eol(*ms.cmd_fp, ms.cmd_view, ms);
                         break;
                     case KEY_HOME:
-                        // TODO
+                        move_to_bol(*ms.cmd_fp, ms.cmd_view);
+                        break;
+                    case KEY_BACKSPACE:
+                        backspace(ms.cmd_fp, ms.cmd_view, ms);
+                        break;
+                    case KEY_DC:
+                        delete_char(ms.cmd_fp, ms.cmd_view, ms);
                         break;
                 }
                 // text insertion
                 for (int i = 0; NORMAL_KEYS[i] != '\0'; i++) {
                     if (key == NORMAL_KEYS[i]) {
-                        type_command_char(&ms, key);
+                        insert_char(key, ms.cmd_fp, ms.cmd_view, ms);
                     }
                 }
                 break;
@@ -220,6 +227,7 @@ int main(int argc, char *argv[]) {
     initscr();
     keypad(stdscr, TRUE);
     noecho();
+    set_escdelay(10);
 
     // main program loop
     loop(fp, argv[1]);
