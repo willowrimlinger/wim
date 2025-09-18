@@ -10,6 +10,7 @@ OBJ = $(patsubst %.c, $(OBJ_DIR)/%.o, $(wildcard *.c))
 
 
 $(OBJ_DIR)/%.o: %.c $(DEPS)
+		@mkdir -p $(OBJ_DIR)
 		$(CC) -c -o $@ $< $(CFLAGS)
 
 wim: $(OBJ)
