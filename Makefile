@@ -9,7 +9,10 @@ OBJ_DIR = obj
 OBJ = $(patsubst %.c, $(OBJ_DIR)/%.o, $(wildcard *.c))
 
 
-$(OBJ_DIR)/%.o: %.c $(DEPS)
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
+
+$(OBJ_DIR)/%.o: %.c $(DEPS) $(OBJ_DIR)
 		$(CC) -c -o $@ $< $(CFLAGS)
 
 mim: $(OBJ)
@@ -18,5 +21,5 @@ mim: $(OBJ)
 .PHONY: clean
 
 clean:
-		rm -f $(OBJ_DIR)/*.o
+		rm -rf $(OBJ_DIR)
 		rm -f mim
